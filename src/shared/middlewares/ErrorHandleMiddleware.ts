@@ -10,13 +10,13 @@ export default class ErrorHandleMiddleware {
   ) {
     if(error instanceof AppError) {
       return res.status(error.statusCode).json({
-        type: 'Error',
+        type: 'error',
         message: error.message,
-      })
+      });
     }
 
     return res.status(500).json({
-      type: 'Error',
+      type: 'error',
       message: 'Internal server error',
     });
   }
