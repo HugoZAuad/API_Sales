@@ -2,7 +2,7 @@ import AppError from "@shared/errors/AppError";
 import { User } from "../database/entities/User";
 import { usersRepositories } from "../database/repositories/userRepositories";
 import { compare } from "bcrypt";
-import { sign } from "jsonwebtoken";
+import { Secret, sign } from "jsonwebtoken";
 
 interface ISessionUser {
   email: string;
@@ -28,7 +28,7 @@ export default class SessionUserService {
       throw new AppError("E-mail ou senha errados", 401);
     }
 
-    const token = sign({}, process.env.APP_SECRET as string, {
+    const token = sign({}, process.env.APP_SECRET as Secret, {
       subject: String(user.id),
       expiresIn: "1d",
     });
