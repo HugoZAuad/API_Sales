@@ -34,12 +34,12 @@ export default class CustomerControllers {
     const { name, email } = request.body
     const id = Number(request.params.id)
     const updateCustomer = new UpdateCustomerService
-    const customer = updateCustomer.execute({
+    const customer = await updateCustomer.execute({
       id,
       name,
       email,
     })
-
+    
     return response.json(customer)
   }
 
