@@ -15,11 +15,11 @@ export class OrdersProducts {
   order_id: string
 
   @ManyToOne(() => Product, product => product.order_products)
-  @JoinColumn({ name: 'order_id' })
+  @JoinColumn({ name: 'product_id' })
   products: Product
 
   @Column()
-  Product_id: string
+  product_id: string
 
   @Column('decimal')
   price: number
@@ -31,5 +31,5 @@ export class OrdersProducts {
   created_at: Date
 
   @UpdateDateColumn()
-  update_ate: Date
+  updated_at: Date
 }

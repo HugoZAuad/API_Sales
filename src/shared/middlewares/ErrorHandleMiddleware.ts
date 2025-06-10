@@ -14,7 +14,7 @@ export default class ErrorHandleMiddleware {
         message: error.message,
       });
     }
-    console.log(error)
+    
     return res.status(500).json({
       type: 'error',
       message: 'Erro interno no servidor',

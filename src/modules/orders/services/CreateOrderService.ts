@@ -29,10 +29,10 @@ export class CreateOrderService {
     }
 
     const quantityAvailable = products.filter(product => {
-      existsProducts.filter(productExistent => productExistent.id === product.id,)[0].quantity < product.quantity
+      return existsProducts.filter(productExistent => productExistent.id === product.id)[0].quantity < product.quantity
     })
     if (quantityAvailable.length) {
-      throw new AppError(`A quantidade ${quantityAvailable[0].quantity} não está disponivel para o produto ${quantityAvailable[0].id}`, 409)
+      throw new AppError(`A quantidade não está disponivel para o produto`, 409)
     }
 
     const serializedProducts = products.map(product => ({
@@ -47,8 +47,8 @@ export class CreateOrderService {
 
     const { order_products } = order
     const updateProductQuantity = order_products.map(product => ({
-      id: product.Product_id,
-      quantity: existsProducts.filter(p => p.id === product.Product_id)[0].quantity - product.quantity
+      id: product.product_id,
+      quantity: existsProducts.filter(p => p.id === product.product_id)[0].quantity - product.quantity
     }))
     await productsRepositories.save(updateProductQuantity)
 
