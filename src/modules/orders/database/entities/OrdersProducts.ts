@@ -2,8 +2,6 @@ import { Product } from './../../../products/database/entities/Product';
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm"
 import { Order } from './Orders'
 
-
-
 @Entity('orders_products')
 export class OrdersProducts {
   @PrimaryGeneratedColumn()
