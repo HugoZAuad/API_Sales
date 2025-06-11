@@ -12,13 +12,14 @@ export default class RedisCach {
     await this.client.set(key, value)
   }
 
-  async recovery<T>(key: string): Promise<T | null>{
+  async recover<T>(key: string): Promise<T | null> {
     const data = await this.client.get(key)
-
-    if(!data) return null;
-
+    if (!data) return null
     const parseData = JSON.parse(data) as T
-
     return parseData
+  }
+
+  async invalidate(key: string): Promise<void> {
+    await this.client.del(key)
   }
 }

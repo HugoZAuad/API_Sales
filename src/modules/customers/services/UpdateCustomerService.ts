@@ -1,6 +1,7 @@
 import AppError from "@shared/errors/AppError"
 import { Customer } from "../database/entities/Customers"
 import { customerRepositories } from "../database/repositories/CustomersRepositories"
+import RedisCache from "@shared/cache/RedisCache"
 
 interface IUpdateCustomer {
   id: number,
@@ -11,6 +12,7 @@ interface IUpdateCustomer {
 export default class UpdateCustomerService {
   async execute({ id, name, email }: IUpdateCustomer): Promise<Customer> {
     const customer = await customerRepositories.findById(id)
+    const redisCache = new RedisCache()
 
     if (!customer) {
       throw new AppError("Cliente não encontrado", 404)
@@ -26,6 +28,8 @@ export default class UpdateCustomerService {
     customer.email = email
 
     await customerRepositories.save(customer)
+
+    await redisCache.invalidate('api-mysales-CUSTOMER_LIST')
 
     return customer
   }

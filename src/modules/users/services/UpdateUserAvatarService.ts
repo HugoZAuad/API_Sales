@@ -1,34 +1,39 @@
-import AppError from "@shared/errors/AppError";
-import { User } from "../database/entities/User";
-import { usersRepositories } from "../database/repositories/userRepositories";
-import path from "path";
-import uploadConfig from "@config/Upload";
-import fs from "fs";
+import AppError from "@shared/errors/AppError"
+import { User } from "../database/entities/User"
+import { usersRepositories } from "../database/repositories/userRepositories"
+import path from "path"
+import uploadConfig from "@config/Upload"
+import fs from "fs"
+import RedisCache from "@shared/cache/RedisCache"
 
 interface IUpdateUserAvatar {
-  userId: number;
-  avatarFileName: string;
+  userId: number
+  avatarFileName: string
 }
 
 export default class UpdateUserAvatarService {
   async execute({ userId, avatarFileName }: IUpdateUserAvatar): Promise<User> {
-    const user = await usersRepositories.findById(userId);
+    const user = await usersRepositories.findById(userId)
+    const redisCache = new RedisCache()
 
     if (!user) {
-      throw new AppError("Usuario não encontrado", 404);
+      throw new AppError("Usuario não encontrado", 404)
     }
 
     if (user.avatar) {
-      const userAvatarFilePath = path.join(uploadConfig.directory, user.avatar);
-      const userAvatarFileExists = await fs.promises.stat(userAvatarFilePath);
+      const userAvatarFilePath = path.join(uploadConfig.directory, user.avatar)
+      const userAvatarFileExists = await fs.promises.stat(userAvatarFilePath)
 
       if (userAvatarFileExists) {
-        await fs.promises.unlink(userAvatarFilePath);
+        await fs.promises.unlink(userAvatarFilePath)
       }
     }
 
-    user.avatar = avatarFileName;
-    await usersRepositories.save(user);
-    return user;
+    user.avatar = avatarFileName
+    await usersRepositories.save(user)
+
+    await redisCache.invalidate('api-mysales-USER_LIST')
+    
+    return user
   }
 }
