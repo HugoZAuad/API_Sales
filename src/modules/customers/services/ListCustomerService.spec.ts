@@ -1,5 +1,5 @@
-import FakeCustomerRepositories from "../domain/repositories/fakes/FakeCustomerRepositories"
-import ListCustomerService from "./ListCustomerService"
+import FakeCustomerRepositories from "@modules/customers/infra/database/repositories/Fakes/FakeCustomerRepositories"
+import ListCustomerService from "@modules/customers/services/ListCustomerService"
 
 describe('ListCustomerService', () => {
   it('Should be able to list customers with pagination', async () => {

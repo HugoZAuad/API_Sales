@@ -1,6 +1,6 @@
 import AppError from "@shared/errors/AppError"
-import FakeCustomerRepositories from "../domain/repositories/fakes/FakeCustomerRepositories"
-import CreateCustomerService from "./CreateCustomerService"
+import FakeCustomerRepositories from "@modules/customers/infra/database/repositories/Fakes/FakeCustomerRepositories"
+import CreateCustomerService from "@modules/customers/services/CreateCustomerService"
 
 describe('CreateCustomerService', () => {
   it('Should be able to create a new customer', async () => {

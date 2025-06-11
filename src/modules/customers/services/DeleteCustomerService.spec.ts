@@ -1,6 +1,6 @@
 import AppError from "@shared/errors/AppError"
-import FakeCustomerRepositories from "../domain/repositories/fakes/FakeCustomerRepositories"
-import DeleteCustomerService from "./DeleteCustomerService"
+import FakeCustomerRepositories from "@modules/customers/infra/database/repositories/Fakes/FakeCustomerRepositories"
+import DeleteCustomerService from "@modules/customers/services/DeleteCustomerService"
 
 describe('DeleteCustomerService', () => {
   it('Should be able to delete an existing customer', async () => {

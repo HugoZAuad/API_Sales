@@ -1,7 +1,7 @@
 import { Customer } from "@modules/customers/infra/database/entities/Customers"
-import { ICreateCustomer } from "../../modules/customers/domain/models/ICreateUser"
-import { ICustomer } from "../../modules/customers/domain/models/ICustomer"
-import { ICustomerRepositories } from "../../modules/customers/domain/repositories/ICreateCustomerRepositories"
+import { ICreateCustomer } from "../../../../domain/models/ICreateUser"
+import { ICustomer } from "../../../../domain/models/ICustomer"
+import { ICustomerRepositories } from "../../../../domain/repositories/ICreateCustomerRepositories"
 
 
 export default class FakeCustomerRepositories implements ICustomerRepositories {

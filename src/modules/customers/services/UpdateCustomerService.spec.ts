@@ -1,6 +1,6 @@
 import AppError from "@shared/errors/AppError"
-import FakeCustomerRepositories from "../domain/repositories/fakes/FakeCustomerRepositories"
-import UpdateCustomerService from "./UpdateCustomerService"
+import FakeCustomerRepositories from "@modules/customers/infra/database/repositories/Fakes/FakeCustomerRepositories"
+import UpdateCustomerService from "@modules/customers/services/UpdateCustomerService"
 
 describe('UpdateCustomerService', () => {
   it('Should be able to update an existing customer', async () => {

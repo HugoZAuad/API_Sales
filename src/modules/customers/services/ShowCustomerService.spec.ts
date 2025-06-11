@@ -1,6 +1,6 @@
 import AppError from "@shared/errors/AppError"
-import FakeCustomerRepositories from "../domain/repositories/fakes/FakeCustomerRepositories"
-import ShowCustomerService from "./ShowCustomerService"
+import FakeCustomerRepositories from "@modules/customers/infra/database/repositories/Fakes/FakeCustomerRepositories"
+import ShowCustomerService from "@modules/customers/services/ShowCustomerService"
 
 describe('ShowCustomerService', () => {
   it('Should be able to show an existing customer', async () => {
