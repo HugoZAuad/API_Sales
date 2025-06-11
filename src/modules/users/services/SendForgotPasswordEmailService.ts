@@ -1,7 +1,7 @@
 import AppError from "@shared/errors/AppError"
 import { usersRepositories } from "../database/repositories/userRepositories"
 import { userTokensRepositories } from "../database/repositories/UserTokensRepositories"
-import { sendEmail } from "@config/Eemail"
+import { sendEmail } from "@config/Email"
 
 interface IForgotPassword {
   email: string
