@@ -1,6 +1,6 @@
-import { Product } from './../database/entities/Product'
+import { Product } from '../infra/database/entities/Product'
 import AppError from '@shared/errors/AppError'
-import { productsRepositories } from '../database/repositories/ProductsRepositories'
+import { productsRepositories } from '../infra/database/repositories/ProductsRepositories'
 import RedisCache from '@shared/cache/RedisCache'
 interface IShowProduct {
   id: string

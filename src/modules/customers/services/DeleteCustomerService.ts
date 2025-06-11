@@ -1,5 +1,5 @@
 import AppError from "@shared/errors/AppError"
-import { customerRepositories } from "../database/repositories/CustomersRepositories"
+import { customerRepositories } from "../infra/database/repositories/CustomersRepositories"
 import RedisCache from "@shared/cache/RedisCache"
 
 interface IDeleteCustomer {

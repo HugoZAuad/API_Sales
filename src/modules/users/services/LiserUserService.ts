@@ -1,6 +1,6 @@
 import { IPagination } from "@shared/interfaces/PaginationInterface"
-import { User } from "../database/entities/User"
-import { usersRepositories } from "../database/repositories/userRepositories"
+import { User } from "../infra/database/entities/User"
+import { usersRepositories } from "../infra/database/repositories/userRepositories"
 import RedisCache from "@shared/cache/RedisCache"
 
 export default class ListUserService {

@@ -1,6 +1,6 @@
 import { IPagination } from "@shared/interfaces/PaginationInterface"
-import { Customer } from "../database/entities/Customers"
-import { customerRepositories } from "../database/repositories/CustomersRepositories"
+import { Customer } from "../infra/database/entities/Customers"
+import { customerRepositories } from "../infra/database/repositories/CustomersRepositories"
 import RedisCache from "@shared/cache/RedisCache"
 
 
