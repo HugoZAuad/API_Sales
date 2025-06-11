@@ -1,17 +1,21 @@
-import { Product } from './../database/entities/Product';
+import { Product } from './../database/entities/Product'
 import AppError from '@shared/errors/AppError'
 import { productsRepositories } from '../database/repositories/ProductsRepositories'
+import RedisCache from '@shared/cache/RedisCache'
 interface IShowProduct {
-  id: string;
+  id: string
 }
 
 export default class ShowProductService {
-  async execute({ id }: IShowProduct): Promise<Product>{
+  async execute({ id }: IShowProduct): Promise<Product> {
     const product = await productsRepositories.findById(id)
+    const redisCache = new RedisCache()
 
-    if(!product){
+    if (!product) {
       throw new AppError('Produto não encontrado', 404)
     }
+
+    await redisCache.invalidate('api-mysales-PRODUCT_LIST')
 
     return product
   }

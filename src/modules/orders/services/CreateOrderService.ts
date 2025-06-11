@@ -4,6 +4,7 @@ import { customerRepositories } from "@modules/customers/database/repositories/C
 import AppError from "@shared/errors/AppError"
 import { productsRepositories } from "@modules/products/database/repositories/ProductsRepositories"
 import { orderRepositories } from "../database/repositories/OrderRepositories"
+import RedisCache from "@shared/cache/RedisCache"
 
 interface ICreateOrder {
   customer_id: string
@@ -13,6 +14,8 @@ interface ICreateOrder {
 export class CreateOrderService {
   async execute({ customer_id, products }: ICreateOrder): Promise<Order> {
     const customerExists = await customerRepositories.findById(Number(customer_id))
+    const redisCache = new RedisCache()
+
     if (!customerExists) {
       throw new AppError("O cliente não foi localizado")
     }
@@ -51,6 +54,8 @@ export class CreateOrderService {
       quantity: existsProducts.filter(p => p.id === product.product_id)[0].quantity - product.quantity
     }))
     await productsRepositories.save(updateProductQuantity)
+
+    await redisCache.invalidate('api-mysales-ORDER_LIST')
 
     return order
   }
