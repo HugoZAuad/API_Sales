@@ -1,13 +1,14 @@
 import AppError from "@shared/errors/AppError"
-import { User } from "../infra/database/entities/User"
-import { usersRepositories } from "../infra/database/repositories/userRepositories"
 import { hash } from "bcrypt"
 import RedisCache from "@shared/cache/RedisCache"
 import { ICreateUser } from "../domain/models/ICreateUser"
+import { IUsersRepositories } from "../domain/repositories/IUsersRepositories"
+import { IUser } from "../domain/models/IUser"
 
 export default class CreateUserService {
-  async execute({ name, email, password }: ICreateUser): Promise<User> {
-    const emailExists = await usersRepositories.findByEmail(email)
+  constructor(private readonly usersRepositories: IUsersRepositories) {}
+  async execute({ name, email, password }: ICreateUser): Promise<IUser> {
+    const emailExists = await this.usersRepositories.findByEmail(email)
     const redisCache = new RedisCache()    
 
     if (emailExists) {
@@ -15,13 +16,11 @@ export default class CreateUserService {
     }
     const hasedPassword = await hash(password, 10)
 
-    const user = usersRepositories.create({
+    const user = await this.usersRepositories.create({
       name,
       email,
       password: hasedPassword,
     })
-
-    await usersRepositories.save(user)
 
     await redisCache.invalidate('api-mysales-USER_LIST')
 

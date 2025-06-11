@@ -1,11 +1,12 @@
 import AppError from "@shared/errors/AppError"
-import { productsRepositories } from "../infra/database/repositories/ProductsRepositories"
 import RedisCache from "@shared/cache/RedisCache"
 import { IDeleteProduct } from "../domain/models/IDeleteProduct"
+import { IProductRepositories } from "../domain/repositories/ICreateProductRepositories"
 
 export default class DeleteProductService {
+  constructor(private readonly productsRepositories: IProductRepositories) {}
   async execute({ id }: IDeleteProduct): Promise<void> {
-    const product = await productsRepositories.findById(id)
+    const product = await this.productsRepositories.findById(id)
     const redisCache = new RedisCache()
 
     if (!product) {
@@ -14,6 +15,6 @@ export default class DeleteProductService {
 
     await redisCache.invalidate('api-mysales-PRODUCT_LIST')
 
-    await productsRepositories.remove(product)
+    await this.productsRepositories.remove(product)
   }
 }

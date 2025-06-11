@@ -13,4 +13,6 @@ export interface IProductRepositories {
   remove(product: IProduct): Promise<void>;
   findById(id: string): Promise<IProduct | null>;
   findByName(name: string): Promise<IProduct | null>;
+  find(): Promise<IProduct[]>;
+  findAndCount(pagination: Pagination): Promise<[IProduct[], number]>;
 }

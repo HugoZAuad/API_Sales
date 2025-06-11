@@ -1,26 +1,27 @@
 import AppError from "@shared/errors/AppError";
 import { Product } from "../infra/database/entities/Product";
-import { productsRepositories } from "../infra/database/repositories/ProductsRepositories";
 import RedisCache from "@shared/cache/RedisCache"
 import { IUpdateProductService } from "../domain/models/IUpdateProductService"
+import { IProductRepositories } from "../domain/repositories/ICreateProductRepositories"
 
 
 
 export default class UpdateProductService {
+  constructor(private readonly productsRepositories: IProductRepositories) {}
   async execute({
     id,
     name,
     price,
     quantity,
   }: IUpdateProductService): Promise<Product> {
-    const product = await productsRepositories.findById(id);
+    const product = await this.productsRepositories.findById(id);
     const redisCache = new RedisCache()
 
     if (!product) {
       throw new AppError("Produto não encontrado", 404);
     }
 
-    const productExists = await productsRepositories.findByName(name);
+    const productExists = await this.productsRepositories.findByName(name);
 
     if (productExists) {
       throw new AppError("Já existe um produto com esse nome", 409);
@@ -30,7 +31,7 @@ export default class UpdateProductService {
     product.price = price;
     product.quantity = quantity;
 
-    await productsRepositories.save(product)
+    await this.productsRepositories.save(product)
 
     await redisCache.invalidate('api-mysales-PRODUCT_LIST')
 

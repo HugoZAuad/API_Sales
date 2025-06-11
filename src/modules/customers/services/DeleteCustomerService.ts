@@ -1,11 +1,12 @@
 import AppError from "@shared/errors/AppError"
-import { customerRepositories } from "../infra/database/repositories/CustomersRepositories"
 import RedisCache from "@shared/cache/RedisCache"
 import { IDeleteCustomer } from "../domain/models/IDeleteCustomer"
+import { ICustomerRepositories } from "../domain/repositories/ICreateCustomerRepositories"
 
 export default class DeleteCustomerService {
+  constructor(private readonly customerRepositories: ICustomerRepositories) {}
   async execute({ id }: IDeleteCustomer): Promise<void> {
-    const customer = await customerRepositories.findById(id)
+    const customer = await this.customerRepositories.findById(id)
     const redisCache = new RedisCache()
 
     if (!customer) {
@@ -14,6 +15,6 @@ export default class DeleteCustomerService {
 
     await redisCache.invalidate('api-mysales-CUSTOMER_LIST')
 
-    await customerRepositories.remove(customer)
+    await this.customerRepositories.remove(customer)
   }
 }

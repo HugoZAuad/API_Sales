@@ -1,14 +1,15 @@
 import AppError from "@shared/errors/AppError"
-import { usersRepositories } from "../infra/database/repositories/userRepositories"
 import { compare } from "bcrypt"
 import { Secret, sign } from "jsonwebtoken"
 import RedisCache from "@shared/cache/RedisCache"
 import { ISessionUser } from "../domain/models/ISessionUser"
 import { ISesssionResponse } from "../domain/models/ISesssionResponse"
+import { IUsersRepositories } from "../domain/repositories/IUsersRepositories"
 
 export default class SessionUserService {
+  constructor(private readonly usersRepositories: IUsersRepositories) {}
   async execute({ email, password }: ISessionUser): Promise<ISesssionResponse> {
-    const user = await usersRepositories.findByEmail(email)
+    const user = await this.usersRepositories.findByEmail(email)
     const redisCache = new RedisCache()
 
     if (!user) {

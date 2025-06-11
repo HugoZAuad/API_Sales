@@ -1,8 +1,4 @@
-export interface IOrderProduct {
-  product_id: string
-  price: number
-  quantity: number
-}
+import { IOrderProduct } from "./IOrderProduct"
 
 export interface ISaveOrder {
   customer_id: string

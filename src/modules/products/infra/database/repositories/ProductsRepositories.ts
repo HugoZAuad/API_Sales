@@ -1,7 +1,6 @@
 import { AppDataSource } from "@shared/infra/typeorm/data-source"
 import { Product } from "../entities/Product"
 import { In, Repository } from "typeorm"
-
 import { IProduct } from "@modules/products/domain/models/IProduct"
 import { IProductRepositories, Pagination } from "@modules/products/domain/repositories/ICreateProductRepositories"
 import { ICreateProduct } from "@modules/products/domain/models/ICreateProduct"
@@ -11,6 +10,9 @@ export default class ProductRepositories implements IProductRepositories {
 
   constructor() {
     this.ormRepository = AppDataSource.getRepository(Product)
+  }
+  find(): Promise<IProduct[]> {
+    throw new Error("Method not implemented.")
   }
 
   async findAllByIds(ids: string[]): Promise<IProduct[]> {

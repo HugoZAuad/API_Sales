@@ -1,18 +1,19 @@
 import AppError from "@shared/errors/AppError"
 import { Customer } from "../infra/database/entities/Customers"
-import { customerRepositories } from "../infra/database/repositories/CustomersRepositories"
 import RedisCache from "@shared/cache/RedisCache"
 import { IUpdateCustomer } from "../domain/models/IUpdateCustomer"
+import { ICustomerRepositories } from "../domain/repositories/ICreateCustomerRepositories"
 export default class UpdateCustomerService {
+  constructor(private readonly customerRepositories: ICustomerRepositories) { }
   async execute({ id, name, email }: IUpdateCustomer): Promise<Customer> {
-    const customer = await customerRepositories.findById(id)
+    const customer = await this.customerRepositories.findById(id)
     const redisCache = new RedisCache()
 
     if (!customer) {
       throw new AppError("Cliente não encontrado", 404)
     }
 
-    const customerExists = await customerRepositories.findByEmail(email)
+    const customerExists = await this.customerRepositories.findByEmail(email)
 
     if (customerExists && email !== customerExists.email) {
       throw new AppError("Já tem um cliente com este e-mail", 409)
@@ -21,7 +22,7 @@ export default class UpdateCustomerService {
     customer.name = name
     customer.email = email
 
-    await customerRepositories.save(customer)
+    await this.customerRepositories.save(customer)
 
     await redisCache.invalidate('api-mysales-CUSTOMER_LIST')
 

@@ -1,15 +1,16 @@
 import AppError from "@shared/errors/AppError"
 import { User } from "../infra/database/entities/User"
-import { usersRepositories } from "../infra/database/repositories/userRepositories"
 import path from "path"
 import uploadConfig from "@config/Upload"
 import fs from "fs"
 import RedisCache from "@shared/cache/RedisCache"
 import { IUpdateUserAvatar } from "../domain/models/IUpdateUserAvatar"
+import { IUsersRepositories } from "../domain/repositories/IUsersRepositories"
 
 export default class UpdateUserAvatarService {
+  constructor(private readonly usersRepositories: IUsersRepositories) {}
   async execute({ userId, avatarFileName }: IUpdateUserAvatar): Promise<User> {
-    const user = await usersRepositories.findById(userId)
+    const user = await this.usersRepositories.findById(userId)
     const redisCache = new RedisCache()
 
     if (!user) {
@@ -26,7 +27,7 @@ export default class UpdateUserAvatarService {
     }
 
     user.avatar = avatarFileName
-    await usersRepositories.save(user)
+    await this.usersRepositories.save(user)
 
     await redisCache.invalidate('api-mysales-USER_LIST')
     

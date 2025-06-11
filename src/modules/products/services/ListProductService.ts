@@ -1,9 +1,10 @@
 import { IPagination } from "@shared/interfaces/PaginationInterface"
 import { Product } from "../infra/database/entities/Product"
-import { productsRepositories } from "../infra/database/repositories/ProductsRepositories"
 import RedisCache from "@shared/cache/RedisCache"
+import { IProductRepositories } from "../domain/repositories/ICreateProductRepositories"
 
 export default class ListProductService {
+  constructor(private readonly productsRepositories: IProductRepositories) {}
   async execute(page: number = 1, limit: number = 10): Promise<IPagination<Product>> {
     const redisCache = new RedisCache()
 
@@ -12,11 +13,11 @@ export default class ListProductService {
     )
 
     if (!products) {
-      products = await productsRepositories.find()
+      products = await this.productsRepositories.find()
       await redisCache.save('api-mysales-PRODUCT_LIST', JSON.stringify(products))
     }
 
-    const [data, total] = await productsRepositories.findAndCount({
+    const [data, total] = await this.productsRepositories.findAndCount({
       take: limit,
       skip: (page - 1) * limit,
     })

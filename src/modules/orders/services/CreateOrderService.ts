@@ -1,57 +1,80 @@
-import { Order } from "../infra/database/entities/Orders"
-import { customerRepositories } from "@modules/customers/infra/database/repositories/CustomersRepositories"
-import AppError from "@shared/errors/AppError"
-import { productsRepositories } from "@modules/products/infra/database/repositories/ProductsRepositories"
-import { orderRepositories } from "../infra/database/repositories/OrderRepositories"
-import RedisCache from "@shared/cache/RedisCache"
-import { ISaveOrder } from "../domain/models/ISaveOrder"
+import { Order } from "../infra/database/entities/Orders";
+import AppError from "@shared/errors/AppError";
+import RedisCache from "@shared/cache/RedisCache";
+import { ISaveOrder } from "../domain/models/ISaveOrder";
+import { IProductRepositories } from "@modules/products/domain/repositories/ICreateProductRepositories";
+import { ICustomerRepositories } from "@modules/customers/domain/repositories/ICreateCustomerRepositories";
+import { IOrderRepositories } from "../domain/repositories/ICreateOrderRepositories";
 
 export class CreateOrderService {
-  async execute({ customer_id, products }: ISaveOrder): Promise<Order> {
-    const customerExists = await customerRepositories.findById(Number(customer_id))
-    const redisCache = new RedisCache()
+  constructor(
+    private readonly productRepositories: IProductRepositories,
+    private readonly customerRepositories: ICustomerRepositories,
+    private readonly orderRepositories: IOrderRepositories
+  ) {}
+
+  async execute({ customer_id, order_products }: ISaveOrder): Promise<Order> {
+    const customerExists = await this.customerRepositories.findById(Number(customer_id));
+    const redisCache = new RedisCache();
 
     if (!customerExists) {
-      throw new AppError("O cliente não foi localizado")
+      throw new AppError("O cliente não foi localizado");
     }
 
-    const existsProducts = await productsRepositories.findAllByIds(products)
+    const existsProducts = await this.productRepositories.findAllByIds(
+      order_products.map((product: { product_id: string }) => product.product_id)
+    );
     if (!existsProducts.length) {
-      throw new AppError("Não foi possivel encontrar os produtos solicitados")
+      throw new AppError("Não foi possivel encontrar os produtos solicitados");
     }
 
-    const existsProductsIds = products.map(product => product.id)
-    const checkInexistentProducts = products.filter(product => !existsProductsIds.includes(product.id))
+    const existsProductsIds = existsProducts.map(product => product.id);
+    const checkInexistentProducts = order_products.filter(
+      (product: { product_id: string }) => !existsProductsIds.includes(product.product_id)
+    );
     if (checkInexistentProducts.length) {
-      throw new AppError(`Produto ${checkInexistentProducts[0].id} não encontrado`, 404)
+      throw new AppError(`Produto ${checkInexistentProducts[0].product_id} não encontrado`, 404);
     }
 
-    const quantityAvailable = products.filter(product => {
-      return existsProducts.filter(productExistent => productExistent.id === product.id)[0].quantity < product.quantity
-    })
+    const quantityAvailable = order_products.filter(
+      (product: { product_id: string; quantity: number }) => {
+        return (
+          existsProducts.filter(productExistent => productExistent.id === product.product_id)[0]
+            .quantity < product.quantity
+        );
+      }
+    );
     if (quantityAvailable.length) {
-      throw new AppError(`A quantidade não está disponivel para o produto`, 409)
+      throw new AppError(`A quantidade não está disponivel para o produto`, 409);
     }
 
-    const serializedProducts = products.map(product => ({
-      product_id: product.id,
-      quantity: product.quantity,
-      price: existsProducts.filter(p => p.id === product.id)[0].price
-    }))
-    const order = await orderRepositories.createOrder({
-      customer: customerExists,
-      products: serializedProducts,
-    })
+    const order = await this.orderRepositories.create({
+      customer_id: String(customerExists.id),
+      order_products: order_products,
+    });
 
-    const { order_products } = order
-    const updateProductQuantity = order_products.map(product => ({
-      id: product.product_id,
-      quantity: existsProducts.filter(p => p.id === product.product_id)[0].quantity - product.quantity
-    }))
-    await productsRepositories.save(updateProductQuantity)
+    const updateProductQuantity = order.order_products.map(
+      (product: { product_id: string; quantity: number }) => ({
+        id: product.product_id,
+        quantity:
+          existsProducts.filter(p => p.id === product.product_id)[0].quantity - product.quantity,
+      })
+    );
 
-    await redisCache.invalidate('api-mysales-ORDER_LIST')
+    for (const product of updateProductQuantity) {
+      await this.productRepositories.save({
+        id: product.id,
+        name: existsProducts.find(p => p.id === product.id)?.name || '',
+        price: existsProducts.find(p => p.id === product.id)?.price || 0,
+        quantity: product.quantity,
+        order_products: [],
+        created_at: new Date(),
+        updated_at: new Date(),
+      });
+    }
 
-    return order
+    await redisCache.invalidate("api-mysales-ORDER_LIST");
+
+    return order;
   }
 }

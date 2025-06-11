@@ -1,13 +1,14 @@
 import AppError from "@shared/errors/AppError"
 import { User } from "../infra/database/entities/User"
-import { usersRepositories } from "../infra/database/repositories/userRepositories"
 import { compare, hash } from "bcrypt"
 import RedisCache from "@shared/cache/RedisCache"
 import { IUpdateProfile } from "../domain/models/IUpdateProfile"
+import { IUsersRepositories } from "../domain/repositories/IUsersRepositories"
 
 export default class UpdateProfileService {
+  constructor(private readonly usersRepositories: IUsersRepositories) {}
   async execute({ user_id, name, email, password, old_password, }: IUpdateProfile): Promise<User> {
-    const user = await usersRepositories.findById(user_id)
+    const user = await this.usersRepositories.findById(user_id)
     const redisCache = new RedisCache()
 
     if (!user) {
@@ -15,7 +16,7 @@ export default class UpdateProfileService {
     }
 
     if (email) {
-      const userUpdateEmail = await usersRepositories.findByEmail(email)
+      const userUpdateEmail = await this.usersRepositories.findByEmail(email)
       if (userUpdateEmail) {
         throw new AppError("Já existe um usuario com este e-mail.", 409)
       }
@@ -41,7 +42,7 @@ export default class UpdateProfileService {
       user.name = name
     }
 
-    await usersRepositories.save(user)
+    await this.usersRepositories.save(user)
 
     await redisCache.invalidate('api-mysales-USER_LIST')
 

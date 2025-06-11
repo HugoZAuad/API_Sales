@@ -11,6 +11,9 @@ export default class customerRepositories implements ICustomerRepositories {
   constructor() {
     this.ormRepository = AppDataSource.getRepository(Customer)
   }
+  find(): Promise<ICustomer[]> {
+    throw new Error("Method not implemented.")
+  }
 
   async findByName(name: string): Promise<ICustomer | null> {
     const customer = await this.ormRepository.findOneBy({

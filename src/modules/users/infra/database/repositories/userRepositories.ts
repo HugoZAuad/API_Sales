@@ -3,7 +3,6 @@ import { Repository } from "typeorm"
 import { User } from "../entities/User"
 import { IUsersRepositories, Pagination } from "@modules/users/domain/repositories/IUsersRepositories"
 import { ICreateUser } from "@modules/users/domain/models/ICreateUser"
-import { IUser } from "@modules/users/domain/models/IUser"
 
 export default class UsersRepositories implements IUsersRepositories {
   private ormRepository: Repository<User>
@@ -11,8 +10,11 @@ export default class UsersRepositories implements IUsersRepositories {
   constructor() {
     this.ormRepository = AppDataSource.getRepository(User)
   }
+  find(): Promise<User[]> {
+    throw new Error("Method not implemented.")
+  }
 
-  async findByName(name: string): Promise<IUser | null> {
+  async findByName(name: string): Promise<User | null> {
     const user = await this.ormRepository.findOneBy({ name })
     return user
   }
@@ -42,11 +44,11 @@ export default class UsersRepositories implements IUsersRepositories {
     await this.ormRepository.remove(user)
   }
 
-  async findAndCount({ take, skip }: Pagination): Promise<[IUser[], number]> {
-    const [user, total] = await this.ormRepository.findAndCount({
+  async findAndCount({ take, skip }: Pagination): Promise<[User[], number]> {
+    const [users, total] = await this.ormRepository.findAndCount({
       take,
       skip,
     })
-    return [user, total]
+    return [users, total]
   }
 }

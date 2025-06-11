@@ -1,12 +1,13 @@
 import AppError from "@shared/errors/AppError"
-import { usersRepositories } from "../infra/database/repositories/userRepositories"
 import { userTokensRepositories } from "../infra/database/repositories/UserTokensRepositories"
 import { sendEmail } from "@config/Email"
 import { IForgotPassword } from "../domain/models/IForgotPassword"
+import { IUsersRepositories } from "../domain/repositories/IUsersRepositories"
 
 export default class SendForgotPasswordEmailService {
+  constructor(private readonly usersRepositories: IUsersRepositories) {}
   async execute({ email }: IForgotPassword): Promise<void> {
-    const user = await usersRepositories.findByEmail(email)
+    const user = await this.usersRepositories.findByEmail(email)
 
     if (!user) {
       throw new AppError("Usuario não encontrado.", 404)
