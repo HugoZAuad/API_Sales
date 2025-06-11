@@ -2,12 +2,7 @@ import AppError from "@shared/errors/AppError"
 import { Customer } from "../infra/database/entities/Customers"
 import { customerRepositories } from "../infra/database/repositories/CustomersRepositories"
 import RedisCache from "@shared/cache/RedisCache"
-
-interface ICreateCustomer {
-  name: string
-  email: string
-}
-
+import { ICreateCustomer } from "../domain/models/ICreateUser"
 export default class CreateCustomerService {
   async execute({ name, email }: ICreateCustomer): Promise<Customer> {
     const emailExists = await customerRepositories.findByEmail(email)
