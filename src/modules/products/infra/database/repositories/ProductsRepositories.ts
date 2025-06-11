@@ -12,8 +12,9 @@ export default class ProductRepositories implements IProductRepositories {
   constructor() {
     this.ormRepository = AppDataSource.getRepository(Product)
   }
-  find(): Promise<IProduct[]> {
-    throw new Error("Method not implemented.")
+  async find(): Promise<IProduct[]> {
+    const products = await this.ormRepository.find();
+    return products;
   }
   async findAndCount({take, skip}:Pagination): Promise<[IProduct[], number]> {
     const [product, total] = await this.ormRepository.findAndCount({

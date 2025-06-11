@@ -2,7 +2,7 @@ import AppError from "@shared/errors/AppError"
 import RedisCache from "@shared/cache/RedisCache"
 import { IDeleteCustomer } from "../domain/models/IDeleteCustomer"
 import { ICustomerRepositories } from "../domain/repositories/ICreateCustomerRepositories"
-import { inject, injectable } from "tsyringe/dist/typings/decorators"
+import { inject, injectable } from "tsyringe"
 
 @injectable()
 export default class DeleteCustomerService {
