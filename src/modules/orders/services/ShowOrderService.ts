@@ -2,9 +2,11 @@ import AppError from "@shared/errors/AppError"
 import { Order } from "../infra/database/entities/Orders"
 import RedisCache from "@shared/cache/RedisCache"
 import { IOrderRepositories } from "../domain/repositories/ICreateOrderRepositories"
+import { inject, injectable } from "tsyringe"
 
+@injectable()
 export class ShowOrderService {
-  constructor(private readonly orderRepositories: IOrderRepositories) { }
+  constructor(@inject('orderRepositories') private readonly orderRepositories: IOrderRepositories) { }
   async execute(id: string): Promise<Order> {
     const order = await this.orderRepositories.findById(Number(id))
     const redisCache = new RedisCache()

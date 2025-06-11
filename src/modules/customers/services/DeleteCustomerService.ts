@@ -2,9 +2,11 @@ import AppError from "@shared/errors/AppError"
 import RedisCache from "@shared/cache/RedisCache"
 import { IDeleteCustomer } from "../domain/models/IDeleteCustomer"
 import { ICustomerRepositories } from "../domain/repositories/ICreateCustomerRepositories"
+import { inject, injectable } from "tsyringe/dist/typings/decorators"
 
+@injectable()
 export default class DeleteCustomerService {
-  constructor(private readonly customerRepositories: ICustomerRepositories) {}
+  constructor(@inject('customerRepositories') private readonly customerRepositories: ICustomerRepositories) {}
   async execute({ id }: IDeleteCustomer): Promise<void> {
     const customer = await this.customerRepositories.findById(id)
     const redisCache = new RedisCache()

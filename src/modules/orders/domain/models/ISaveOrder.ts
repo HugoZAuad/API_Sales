@@ -1,6 +1,13 @@
-import { IOrderProduct } from "./IOrderProduct"
+import { ICustomer } from "@modules/customers/domain/models/ICustomer";
+
+export interface IOrderProduct {
+  product_id: string;
+  price: number;
+  quantity: number;
+}
 
 export interface ISaveOrder {
-  customer_id: string
-  order_products: IOrderProduct[]
+  customer_id: string;
+  customer?: ICustomer;
+  order_products: IOrderProduct[];
 }

@@ -2,9 +2,11 @@ import { IPagination } from "@shared/interfaces/PaginationInterface"
 import { Customer } from "../infra/database/entities/Customers"
 import RedisCache from "@shared/cache/RedisCache"
 import { ICustomerRepositories } from "../domain/repositories/ICreateCustomerRepositories"
+import { injectable, inject } from "tsyringe"
 
+@injectable()
 export default class ListCustomerService {
-  constructor(private readonly customerRepositories: ICustomerRepositories) {}
+  constructor( @inject('customerRepositories') private readonly customerRepositories: ICustomerRepositories) {}
   async execute(page: number = 1, limit: number = 10): Promise<IPagination<Customer>> {
     const redisCache = new RedisCache()
 

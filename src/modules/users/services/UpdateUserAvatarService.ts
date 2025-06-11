@@ -6,9 +6,12 @@ import fs from "fs"
 import RedisCache from "@shared/cache/RedisCache"
 import { IUpdateUserAvatar } from "../domain/models/IUpdateUserAvatar"
 import { IUsersRepositories } from "../domain/repositories/IUsersRepositories"
+import { injectable, inject } from "tsyringe"
 
+@injectable()
 export default class UpdateUserAvatarService {
-  constructor(private readonly usersRepositories: IUsersRepositories) {}
+  constructor(@inject('usersRepositories')
+    private readonly usersRepositories: IUsersRepositories) {}
   async execute({ userId, avatarFileName }: IUpdateUserAvatar): Promise<User> {
     const user = await this.usersRepositories.findById(userId)
     const redisCache = new RedisCache()

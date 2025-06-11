@@ -4,9 +4,12 @@ import { compare, hash } from "bcrypt"
 import RedisCache from "@shared/cache/RedisCache"
 import { IUpdateProfile } from "../domain/models/IUpdateProfile"
 import { IUsersRepositories } from "../domain/repositories/IUsersRepositories"
+import { injectable, inject } from "tsyringe"
 
+@injectable()
 export default class UpdateProfileService {
-  constructor(private readonly usersRepositories: IUsersRepositories) {}
+  constructor(@inject('usersRepositories')
+    private readonly usersRepositories: IUsersRepositories) {}
   async execute({ user_id, name, email, password, old_password, }: IUpdateProfile): Promise<User> {
     const user = await this.usersRepositories.findById(user_id)
     const redisCache = new RedisCache()

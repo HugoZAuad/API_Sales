@@ -3,9 +3,11 @@ import AppError from "@shared/errors/AppError";
 import RedisCache from "@shared/cache/RedisCache"
 import { ICreateProduct } from "../domain/models/ICreateProduct"
 import { IProductRepositories } from "../domain/repositories/ICreateProductRepositories"
+import { injectable, inject } from "tsyringe"
 
+@injectable()
 export default class CreateProductService {
-  constructor(private readonly productsRepositories: IProductRepositories) {}
+  constructor(@inject('productRepositories') private readonly productsRepositories: IProductRepositories) {}
   async execute({ name, price, quantity }: ICreateProduct): Promise<Product> {
     const productExists = await this.productsRepositories.findByName(name);
     const redisCache = new RedisCache()

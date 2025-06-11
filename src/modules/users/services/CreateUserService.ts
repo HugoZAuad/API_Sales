@@ -4,9 +4,12 @@ import RedisCache from "@shared/cache/RedisCache"
 import { ICreateUser } from "../domain/models/ICreateUser"
 import { IUsersRepositories } from "../domain/repositories/IUsersRepositories"
 import { IUser } from "../domain/models/IUser"
+import { injectable, inject } from "tsyringe"
 
+@injectable()
 export default class CreateUserService {
-  constructor(private readonly usersRepositories: IUsersRepositories) {}
+  constructor(@inject('usersRepositories')
+    private readonly usersRepositories: IUsersRepositories) {}
   async execute({ name, email, password }: ICreateUser): Promise<IUser> {
     const emailExists = await this.usersRepositories.findByEmail(email)
     const redisCache = new RedisCache()    

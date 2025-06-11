@@ -2,9 +2,11 @@ import { IPagination } from "@shared/interfaces/PaginationInterface"
 import { Product } from "../infra/database/entities/Product"
 import RedisCache from "@shared/cache/RedisCache"
 import { IProductRepositories } from "../domain/repositories/ICreateProductRepositories"
+import { injectable, inject } from "tsyringe"
 
+@injectable()
 export default class ListProductService {
-  constructor(private readonly productsRepositories: IProductRepositories) {}
+  constructor(@inject('productRepositories') private readonly productsRepositories: IProductRepositories) {}
   async execute(page: number = 1, limit: number = 10): Promise<IPagination<Product>> {
     const redisCache = new RedisCache()
 

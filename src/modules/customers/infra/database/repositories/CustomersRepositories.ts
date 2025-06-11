@@ -4,7 +4,6 @@ import { ICustomerRepositories, Pagination } from "@modules/customers/domain/rep
 import { ICreateCustomer } from "@modules/customers/domain/models/ICreateUser"
 import { ICustomer } from "@modules/customers/domain/models/ICustomer"
 import { Repository } from "typeorm"
-
 export default class customerRepositories implements ICustomerRepositories {
   private ormRepository: Repository<Customer>
 

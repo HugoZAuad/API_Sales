@@ -2,9 +2,12 @@ import { IPagination } from "@shared/interfaces/PaginationInterface"
 import { User } from "../infra/database/entities/User"
 import RedisCache from "@shared/cache/RedisCache"
 import { IUsersRepositories } from "../domain/repositories/IUsersRepositories"
+import { injectable, inject } from "tsyringe"
 
+@injectable()
 export default class ListUserService {
-  constructor(private readonly usersRepositories: IUsersRepositories) {}
+  constructor(@inject('usersRepositories')
+    private readonly usersRepositories: IUsersRepositories) {}
   async execute(page: number = 1, limit: number = 10): Promise<IPagination<User>> {
     const redisCache = new RedisCache()
 

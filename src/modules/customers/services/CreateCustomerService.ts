@@ -1,10 +1,18 @@
+import { injectable, inject } from 'tsyringe';
 import AppError from "@shared/errors/AppError"
 import { Customer } from "../infra/database/entities/Customers"
 import RedisCache from "@shared/cache/RedisCache"
 import { ICreateCustomer } from "../domain/models/ICreateUser"
 import { ICustomerRepositories } from "../domain/repositories/ICreateCustomerRepositories"
+
+
+@injectable()
 export default class CreateCustomerService {
-  constructor(private readonly customerRepositories: ICustomerRepositories) {}
+  constructor(
+    @inject('customerRepositories')
+    private readonly customerRepositories: ICustomerRepositories,
+  ) {}
+
   async execute({ name, email }: ICreateCustomer): Promise<Customer> {
     const emailExists = await this.customerRepositories.findByEmail(email)
     const redisCache = new RedisCache()

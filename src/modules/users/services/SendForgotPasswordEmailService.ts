@@ -3,9 +3,12 @@ import { userTokensRepositories } from "../infra/database/repositories/UserToken
 import { sendEmail } from "@config/Email"
 import { IForgotPassword } from "../domain/models/IForgotPassword"
 import { IUsersRepositories } from "../domain/repositories/IUsersRepositories"
+import { injectable, inject } from "tsyringe"
 
+@injectable()
 export default class SendForgotPasswordEmailService {
-  constructor(private readonly usersRepositories: IUsersRepositories) {}
+  constructor(@inject('usersRepositories')
+    private readonly usersRepositories: IUsersRepositories) {}
   async execute({ email }: IForgotPassword): Promise<void> {
     const user = await this.usersRepositories.findByEmail(email)
 

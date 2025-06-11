@@ -5,9 +5,12 @@ import { ISaveOrder } from "../domain/models/ISaveOrder";
 import { IProductRepositories } from "@modules/products/domain/repositories/ICreateProductRepositories";
 import { ICustomerRepositories } from "@modules/customers/domain/repositories/ICreateCustomerRepositories";
 import { IOrderRepositories } from "../domain/repositories/ICreateOrderRepositories";
+import { injectable, inject } from "tsyringe"
 
+@injectable()
 export class CreateOrderService {
   constructor(
+    @inject('orderRepositories')
     private readonly productRepositories: IProductRepositories,
     private readonly customerRepositories: ICustomerRepositories,
     private readonly orderRepositories: IOrderRepositories
@@ -49,7 +52,8 @@ export class CreateOrderService {
     }
 
     const order = await this.orderRepositories.create({
-      customer_id: String(customerExists.id),
+      customer_id: customerExists.id.toString(),
+      customer: customerExists,
       order_products: order_products,
     });
 

@@ -4,8 +4,12 @@ import { isAfter, addHours } from "date-fns";
 import { hash } from "bcrypt";
 import { IResetPassword } from "../domain/models/IResetPassword"
 import { IUsersRepositories } from "../domain/repositories/IUsersRepositories"
+import { injectable, inject } from "tsyringe"
+
+@injectable()
 export default class ResetPasswordService {
-  constructor(private readonly usersRepositories: IUsersRepositories) {}
+  constructor(@inject('usersRepositories')
+    private readonly usersRepositories: IUsersRepositories) {}
   async execute({ token, password }: IResetPassword): Promise<void> {
     const userToken = await userTokensRepositories.findByToken(token);
 

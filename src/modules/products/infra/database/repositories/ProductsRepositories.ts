@@ -1,6 +1,7 @@
 import { AppDataSource } from "@shared/infra/typeorm/data-source"
 import { Product } from "../entities/Product"
 import { In, Repository } from "typeorm"
+
 import { IProduct } from "@modules/products/domain/models/IProduct"
 import { IProductRepositories, Pagination } from "@modules/products/domain/repositories/ICreateProductRepositories"
 import { ICreateProduct } from "@modules/products/domain/models/ICreateProduct"
@@ -13,6 +14,13 @@ export default class ProductRepositories implements IProductRepositories {
   }
   find(): Promise<IProduct[]> {
     throw new Error("Method not implemented.")
+  }
+  async findAndCount({take, skip}:Pagination): Promise<[IProduct[], number]> {
+    const [product, total] = await this.ormRepository.findAndCount({
+      take,
+      skip,
+    })
+    return [product, total]
   }
 
   async findAllByIds(ids: string[]): Promise<IProduct[]> {
@@ -49,13 +57,5 @@ export default class ProductRepositories implements IProductRepositories {
 
   async remove(product: IProduct): Promise<void> {
     await this.ormRepository.remove(product);
-  }
-
-    async findAndCount({ take, skip }: Pagination): Promise<[IProduct[], number]> {
-    const [product, total] = await this.ormRepository.findAndCount({
-      take,
-      skip,
-    })
-    return [product, total]
   }
 }

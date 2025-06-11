@@ -3,8 +3,10 @@ import { Customer } from "../infra/database/entities/Customers"
 import RedisCache from "@shared/cache/RedisCache"
 import { IUpdateCustomer } from "../domain/models/IUpdateCustomer"
 import { ICustomerRepositories } from "../domain/repositories/ICreateCustomerRepositories"
+import { injectable, inject } from "tsyringe"
+@injectable()
 export default class UpdateCustomerService {
-  constructor(private readonly customerRepositories: ICustomerRepositories) { }
+  constructor(@inject('customerRepositories') private readonly customerRepositories: ICustomerRepositories) { }
   async execute({ id, name, email }: IUpdateCustomer): Promise<Customer> {
     const customer = await this.customerRepositories.findById(id)
     const redisCache = new RedisCache()
