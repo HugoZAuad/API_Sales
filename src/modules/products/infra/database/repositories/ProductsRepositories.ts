@@ -1,25 +1,59 @@
-import { AppDataSource } from "@shared/infra/typeorm/data-source";
-import { Product } from "../entities/Product";
-import {In} from "typeorm";
+import { AppDataSource } from "@shared/infra/typeorm/data-source"
+import { Product } from "../entities/Product"
+import { In, Repository } from "typeorm"
 
-interface IFindProducts{
-  id: string
-}
+import { IProduct } from "@modules/products/domain/models/IProduct"
+import { IProductRepositories, Pagination } from "@modules/products/domain/repositories/ICreateProductRepositories"
+import { ICreateProduct } from "@modules/products/domain/models/ICreateProduct"
 
-export const productsRepositories = AppDataSource.getRepository(Product).extend(
-  {
-    async findByName(name: string): Promise<Product | null> {
-      return this.findOneBy({ name });
-    },
-    async findById(id: string): Promise<Product | null> {
-      return this.findOneBy({ id });
-    },
-    async findAllByIds(products: IFindProducts[]): Promise <Product[]>{
-      const productsIds = products.map(product => product.id)
-      const existentProducts = await this.find({
-        where: {id: In(productsIds)}
-      })
-      return existentProducts
-    }
+export default class ProductRepositories implements IProductRepositories {
+  private ormRepository: Repository<Product>
+
+  constructor() {
+    this.ormRepository = AppDataSource.getRepository(Product)
   }
-);
+
+  async findAllByIds(ids: string[]): Promise<IProduct[]> {
+    const existentProducts = await this.ormRepository.find({
+      where: { id: In(ids) },
+    });
+    return existentProducts;
+  }
+
+  async findByName(name: string): Promise<IProduct | null> {
+    const product = await this.ormRepository.findOneBy({
+      name,
+    });
+    return product;
+  }
+
+  async findById(id: string): Promise<IProduct | null> {
+    const product = await this.ormRepository.findOneBy({
+      id,
+    });
+    return product;
+  }
+
+  async create(data: ICreateProduct): Promise<IProduct> {
+    const product = this.ormRepository.create(data);
+    await this.ormRepository.save(product);
+    return product;
+  }
+
+  async save(product: IProduct): Promise<IProduct> {
+    await this.ormRepository.save(product);
+    return product;
+  }
+
+  async remove(product: IProduct): Promise<void> {
+    await this.ormRepository.remove(product);
+  }
+
+    async findAndCount({ take, skip }: Pagination): Promise<[IProduct[], number]> {
+    const [product, total] = await this.ormRepository.findAndCount({
+      take,
+      skip,
+    })
+    return [product, total]
+  }
+}

@@ -4,10 +4,10 @@ import AppError from "@shared/errors/AppError"
 import { productsRepositories } from "@modules/products/infra/database/repositories/ProductsRepositories"
 import { orderRepositories } from "../infra/database/repositories/OrderRepositories"
 import RedisCache from "@shared/cache/RedisCache"
-import { ICreateOrder } from "../domain/models/ICreateOrder"
+import { ISaveOrder } from "../domain/models/ISaveOrder"
 
 export class CreateOrderService {
-  async execute({ customer_id, products }: ICreateOrder): Promise<Order> {
+  async execute({ customer_id, products }: ISaveOrder): Promise<Order> {
     const customerExists = await customerRepositories.findById(Number(customer_id))
     const redisCache = new RedisCache()
 
