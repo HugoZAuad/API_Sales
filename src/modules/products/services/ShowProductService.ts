@@ -2,9 +2,7 @@ import { Product } from '../infra/database/entities/Product'
 import AppError from '@shared/errors/AppError'
 import { productsRepositories } from '../infra/database/repositories/ProductsRepositories'
 import RedisCache from '@shared/cache/RedisCache'
-interface IShowProduct {
-  id: string
-}
+import { IShowProduct } from '../domain/models/IShowProduct'
 
 export default class ShowProductService {
   async execute({ id }: IShowProduct): Promise<Product> {

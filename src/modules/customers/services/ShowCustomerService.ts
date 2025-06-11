@@ -2,10 +2,7 @@ import AppError from "@shared/errors/AppError"
 import { Customer } from "../infra/database/entities/Customers"
 import { customerRepositories } from "../infra/database/repositories/CustomersRepositories"
 import RedisCache from "@shared/cache/RedisCache"
-
-interface IShowCustomer {
-  id: number
-}
+import { IShowCustomer } from "../domain/models/IShowCustomer"
 
 export default class ShowCustomerService {
   async execute({ id }: IShowCustomer): Promise<Customer> {

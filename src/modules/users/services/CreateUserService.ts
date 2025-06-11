@@ -3,13 +3,7 @@ import { User } from "../infra/database/entities/User"
 import { usersRepositories } from "../infra/database/repositories/userRepositories"
 import { hash } from "bcrypt"
 import RedisCache from "@shared/cache/RedisCache"
-
-
-interface ICreateUser {
-  name: string
-  email: string
-  password: string
-}
+import { ICreateUser } from "../domain/models/ICreateUser"
 
 export default class CreateUserService {
   async execute({ name, email, password }: ICreateUser): Promise<User> {

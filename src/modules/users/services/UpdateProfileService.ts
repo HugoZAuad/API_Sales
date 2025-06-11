@@ -3,14 +3,7 @@ import { User } from "../infra/database/entities/User"
 import { usersRepositories } from "../infra/database/repositories/userRepositories"
 import { compare, hash } from "bcrypt"
 import RedisCache from "@shared/cache/RedisCache"
-
-interface IUpdateProfile {
-  user_id: number,
-  name: string,
-  email: string,
-  password: string,
-  old_password: string,
-}
+import { IUpdateProfile } from "../domain/models/IUpdateProfile"
 
 export default class UpdateProfileService {
   async execute({ user_id, name, email, password, old_password, }: IUpdateProfile): Promise<User> {

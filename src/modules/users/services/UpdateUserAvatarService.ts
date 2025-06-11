@@ -5,11 +5,7 @@ import path from "path"
 import uploadConfig from "@config/Upload"
 import fs from "fs"
 import RedisCache from "@shared/cache/RedisCache"
-
-interface IUpdateUserAvatar {
-  userId: number
-  avatarFileName: string
-}
+import { IUpdateUserAvatar } from "../domain/models/IUpdateUserAvatar"
 
 export default class UpdateUserAvatarService {
   async execute({ userId, avatarFileName }: IUpdateUserAvatar): Promise<User> {

@@ -1,15 +1,10 @@
-import { Product } from "@modules/products/infra/database/entities/Product"
 import { Order } from "../infra/database/entities/Orders"
 import { customerRepositories } from "@modules/customers/infra/database/repositories/CustomersRepositories"
 import AppError from "@shared/errors/AppError"
 import { productsRepositories } from "@modules/products/infra/database/repositories/ProductsRepositories"
 import { orderRepositories } from "../infra/database/repositories/OrderRepositories"
 import RedisCache from "@shared/cache/RedisCache"
-
-interface ICreateOrder {
-  customer_id: string
-  products: Product[]
-}
+import { ICreateOrder } from "../domain/models/ICreateOrder"
 
 export class CreateOrderService {
   async execute({ customer_id, products }: ICreateOrder): Promise<Order> {

@@ -1,19 +1,10 @@
 import AppError from "@shared/errors/AppError"
-import { User } from "../infra/database/entities/User"
 import { usersRepositories } from "../infra/database/repositories/userRepositories"
 import { compare } from "bcrypt"
 import { Secret, sign } from "jsonwebtoken"
 import RedisCache from "@shared/cache/RedisCache"
-
-interface ISessionUser {
-  email: string
-  password: string
-}
-
-interface ISesssionResponse {
-  user: User
-  token: string
-}
+import { ISessionUser } from "../domain/models/ISessionUser"
+import { ISesssionResponse } from "../domain/models/ISesssionResponse"
 
 export default class SessionUserService {
   async execute({ email, password }: ISessionUser): Promise<ISesssionResponse> {

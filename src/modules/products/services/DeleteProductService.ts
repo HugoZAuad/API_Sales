@@ -1,10 +1,7 @@
 import AppError from "@shared/errors/AppError"
 import { productsRepositories } from "../infra/database/repositories/ProductsRepositories"
 import RedisCache from "@shared/cache/RedisCache"
-
-interface IDeleteProduct {
-  id: string
-}
+import { IDeleteProduct } from "../domain/models/IDeleteProduct"
 
 export default class DeleteProductService {
   async execute({ id }: IDeleteProduct): Promise<void> {

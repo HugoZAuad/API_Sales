@@ -3,12 +3,7 @@ import { userTokensRepositories } from "../infra/database/repositories/UserToken
 import { usersRepositories } from "../infra/database/repositories/userRepositories";
 import { isAfter, addHours } from "date-fns";
 import { hash } from "bcrypt";
-
-interface IResetPassword {
-  token: string;
-  password: string;
-}
-
+import { IResetPassword } from "../domain/models/IResetPassword"
 export default class ResetPasswordService {
   async execute({ token, password }: IResetPassword): Promise<void> {
     const userToken = await userTokensRepositories.findByToken(token);

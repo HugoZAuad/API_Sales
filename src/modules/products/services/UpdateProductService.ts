@@ -2,13 +2,9 @@ import AppError from "@shared/errors/AppError";
 import { Product } from "../infra/database/entities/Product";
 import { productsRepositories } from "../infra/database/repositories/ProductsRepositories";
 import RedisCache from "@shared/cache/RedisCache"
+import { IUpdateProductService } from "../domain/models/IUpdateProductService"
 
-interface IUpdateProductService {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-}
+
 
 export default class UpdateProductService {
   async execute({

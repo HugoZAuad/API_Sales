@@ -3,8 +3,6 @@ import { Customer } from "../infra/database/entities/Customers"
 import { customerRepositories } from "../infra/database/repositories/CustomersRepositories"
 import RedisCache from "@shared/cache/RedisCache"
 
-
-
 export default class ListCustomerService {
   async execute(page: number = 1, limit: number = 10): Promise<IPagination<Customer>> {
     const redisCache = new RedisCache()
