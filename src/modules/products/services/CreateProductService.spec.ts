@@ -1,38 +1,34 @@
 import AppError from "@shared/errors/AppError";
-import FakeProductsRepositories from "@modules/products/infra/database/repositories/Fakes/FakeProductsRepositories";
+import { makeFakeProduct, makeFakeProductRepository } from "@modules/products/domain/factory/ProductFactory";
 import CreateProductService from "./CreateProductService";
 
-describe('CreateProductService', () => {
-  it('Deve criar um novo produto com sucesso', async () => {
-    const fakeProductsRepositories = new FakeProductsRepositories();
-    const createProduct = new CreateProductService(fakeProductsRepositories);
+import { IProductRepositories } from "@modules/products/domain/repositories/ICreateProductRepositories";
 
-    const product = await createProduct.execute({
-      name: 'Produto Teste',
-      price: 100,
-      quantity: 10,
-    });
+describe('CreateProductService', () => {
+  let fakeProductsRepositories: IProductRepositories;
+  let createProduct: CreateProductService;
+
+  beforeEach(() => {
+    fakeProductsRepositories = makeFakeProductRepository();
+    createProduct = new CreateProductService(fakeProductsRepositories);
+  });
+
+  it('Deve criar um novo produto com sucesso', async () => {
+    const productData = makeFakeProduct({ name: 'Unique Product', price: 100, quantity: 10 });
+
+    const product = await createProduct.execute(productData);
 
     expect(product).toHaveProperty('id');
-    expect(product.name).toBe('Produto Teste');
+    expect(product.name).toBe(productData.name);
   });
 
   it('Deve lançar erro se o nome do produto já existir', async () => {
-    const fakeProductsRepositories = new FakeProductsRepositories();
-    const createProduct = new CreateProductService(fakeProductsRepositories);
+    const productData = makeFakeProduct({ name: 'Duplicate Product', price: 100, quantity: 10 });
 
-    await createProduct.execute({
-      name: 'Produto Teste',
-      price: 100,
-      quantity: 10,
-    });
+    await createProduct.execute(productData);
 
     await expect(
-      createProduct.execute({
-        name: 'Produto Teste',
-        price: 200,
-        quantity: 5,
-      })
+      createProduct.execute(productData)
     ).rejects.toBeInstanceOf(AppError);
   });
 });

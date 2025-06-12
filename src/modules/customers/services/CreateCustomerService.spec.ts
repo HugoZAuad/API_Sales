@@ -1,35 +1,33 @@
-import AppError from "@shared/errors/AppError"
-import FakeCustomerRepositories from "@modules/customers/infra/database/repositories/Fakes/FakeCustomerRepositories"
-import CreateCustomerService from "@modules/customers/services/CreateCustomerService"
+import AppError from "@shared/errors/AppError";
+import CreateCustomerService from "@modules/customers/services/CreateCustomerService";
+
+import { setupCustomerServiceTest } from "../domain/factory/CustomerServiceTestUtils";
+import { Customer } from "@modules/customers/infra/database/entities/Customers";
 
 describe('CreateCustomerService', () => {
-  it('Should be able to create a new customer', async () => {
-    const fakeCustomerRepositories = new FakeCustomerRepositories()
-    const createCustomer = new CreateCustomerService(fakeCustomerRepositories)
+  let createCustomer: CreateCustomerService;
+  const { getFakeCustomerRepository, makeFakeCustomer } = setupCustomerServiceTest();
 
-    const customer = await createCustomer.execute({
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-    })
+  beforeEach(() => {
+    createCustomer = new CreateCustomerService(getFakeCustomerRepository());
+  });
 
-    expect(customer).toHaveProperty('id')
-    expect(customer.email).toBe('john.doe@example.com')
-  })
+  it('Deve ser capaz de criar um novo cliente', async () => {
+    const customerData = makeFakeCustomer({ email: 'unique.email@example.com' });
 
-  it('Should note be able to create a new customer with email that is already in use', async () => {
-    const fakeCustomerRepositories = new FakeCustomerRepositories()
-    const createCustomer = new CreateCustomerService(fakeCustomerRepositories)
+    const customer: Customer = await createCustomer.execute(customerData);
 
-    await createCustomer.execute({
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-    })
+    expect(customer).toHaveProperty('id');
+    expect(customer.email).toBe(customerData.email);
+  });
+
+  it('Não deve ser capaz de criar um cliente com email já em uso', async () => {
+    const customerData = makeFakeCustomer({ email: 'duplicate.email@example.com' });
+
+    await createCustomer.execute(customerData);
 
     await expect(
-      createCustomer.execute({
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-    })
-    ).rejects.toBeInstanceOf(AppError)
-  })
-})
+      createCustomer.execute(customerData)
+    ).rejects.toBeInstanceOf(AppError);
+  });
+});

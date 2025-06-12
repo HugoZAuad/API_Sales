@@ -1,27 +1,28 @@
-import AppError from "@shared/errors/AppError"
-import FakeCustomerRepositories from "@modules/customers/infra/database/repositories/Fakes/FakeCustomerRepositories"
-import ShowCustomerService from "@modules/customers/services/ShowCustomerService"
+import AppError from "@shared/errors/AppError";
+import ShowCustomerService from "@modules/customers/services/ShowCustomerService";
+
+import { setupCustomerServiceTest } from "../domain/factory/CustomerServiceTestUtils";
 
 describe('ShowCustomerService', () => {
+  let showCustomer: ShowCustomerService;
+  const { getFakeCustomerRepository, makeFakeCustomer } = setupCustomerServiceTest();
+
+  beforeEach(() => {
+    showCustomer = new ShowCustomerService(getFakeCustomerRepository());
+  });
+
   it('Should be able to show an existing customer', async () => {
-    const fakeCustomerRepositories = new FakeCustomerRepositories()
-    const showCustomer = new ShowCustomerService(fakeCustomerRepositories)
+    const customerData = makeFakeCustomer();
 
-    const customer = await fakeCustomerRepositories.create({
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-    })
+    const customer = await getFakeCustomerRepository().create(customerData);
 
-    const foundCustomer = await showCustomer.execute({ id: customer.id })
+    const foundCustomer = await showCustomer.execute({ id: customer.id });
 
-    expect(foundCustomer).toHaveProperty('id')
-    expect(foundCustomer.email).toBe('john.doe@example.com')
-  })
+    expect(foundCustomer).toHaveProperty('id');
+    expect(foundCustomer.email).toBe(customerData.email);
+  });
 
   it('Should not be able to show a non-existing customer', async () => {
-    const fakeCustomerRepositories = new FakeCustomerRepositories()
-    const showCustomer = new ShowCustomerService(fakeCustomerRepositories)
-
-    await expect(showCustomer.execute({ id: 9999 })).rejects.toBeInstanceOf(AppError)
-  })
-})
+    await expect(showCustomer.execute({ id: 9999 })).rejects.toBeInstanceOf(AppError);
+  });
+});

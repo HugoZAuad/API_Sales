@@ -1,45 +1,33 @@
 import AppError from "@shared/errors/AppError";
-import FakeOrdersRepositories from "@modules/orders/domain/repositories/fakes/FakeOrdersRepositories";
 import { CreateOrderService } from "./CreateOrderService";
-import { IProductRepositories } from "@modules/products/domain/repositories/ICreateProductRepositories";
-import { ICustomerRepositories } from "@modules/customers/domain/repositories/ICreateCustomerRepositories";
+
+import { setupOrderServiceTest } from "./OrderServiceTestUtils";
 
 describe('CreateOrderService', () => {
-  let fakeOrdersRepositories: FakeOrdersRepositories;
   let createOrderService: CreateOrderService;
-
-  // Mocks para productRepositories e customerRepositories
-  const fakeProductRepositories = {
-    findAllByIds: jest.fn(),
-    save: jest.fn(),
-  };
-
-  const fakeCustomerRepositories = {
-    findById: jest.fn(),
-  };
+  const { getFakeOrderRepository, getFakeProductRepository, getFakeCustomerRepository, makeFakeOrder } = setupOrderServiceTest();
 
   beforeEach(() => {
-    fakeOrdersRepositories = new FakeOrdersRepositories();
     createOrderService = new CreateOrderService(
-      fakeProductRepositories as unknown as IProductRepositories,
-      fakeCustomerRepositories as unknown as ICustomerRepositories,
-      fakeOrdersRepositories,
+      getFakeProductRepository(),
+      getFakeCustomerRepository(),
+      getFakeOrderRepository(),
     );
   });
 
   it('Deve criar um novo pedido com sucesso', async () => {
-    fakeCustomerRepositories.findById.mockResolvedValue({
+    jest.spyOn(getFakeCustomerRepository(), 'findById').mockResolvedValue({
       id: 1,
       name: 'Cliente Teste',
       email: 'cliente@teste.com',
     });
 
-    fakeProductRepositories.findAllByIds.mockResolvedValue([
+    jest.spyOn(getFakeProductRepository(), 'findAllByIds').mockResolvedValue([
       { id: 'prod1', name: 'Produto 1', price: 10, quantity: 5 },
       { id: 'prod2', name: 'Produto 2', price: 20, quantity: 10 },
     ]);
 
-    fakeProductRepositories.save.mockResolvedValue(undefined);
+    jest.spyOn(getFakeProductRepository(), 'save').mockResolvedValue(undefined);
 
     const orderData = {
       customer_id: '1',
@@ -57,7 +45,7 @@ describe('CreateOrderService', () => {
   });
 
   it('Deve lançar erro se cliente não for encontrado', async () => {
-    fakeCustomerRepositories.findById.mockResolvedValue(null);
+    jest.spyOn(getFakeCustomerRepository(), 'findById').mockResolvedValue(null);
 
     await expect(
       createOrderService.execute({
@@ -68,9 +56,9 @@ describe('CreateOrderService', () => {
   });
 
   it('Deve lançar erro se produtos não forem encontrados', async () => {
-    fakeCustomerRepositories.findById.mockResolvedValue({ id: 1 });
+    jest.spyOn(getFakeCustomerRepository(), 'findById').mockResolvedValue({ id: 1 });
 
-    fakeProductRepositories.findAllByIds.mockResolvedValue([]);
+    jest.spyOn(getFakeProductRepository(), 'findAllByIds').mockResolvedValue([]);
 
     await expect(
       createOrderService.execute({
@@ -81,9 +69,9 @@ describe('CreateOrderService', () => {
   });
 
   it('Deve lançar erro se algum produto não existir', async () => {
-    fakeCustomerRepositories.findById.mockResolvedValue({ id: 1 });
+    jest.spyOn(getFakeCustomerRepository(), 'findById').mockResolvedValue({ id: 1 });
 
-    fakeProductRepositories.findAllByIds.mockResolvedValue([
+    jest.spyOn(getFakeProductRepository(), 'findAllByIds').mockResolvedValue([
       { id: 'prod2', name: 'Produto 2', price: 20, quantity: 10 },
     ]);
 
@@ -96,9 +84,9 @@ describe('CreateOrderService', () => {
   });
 
   it('Deve lançar erro se a quantidade solicitada não estiver disponível', async () => {
-    fakeCustomerRepositories.findById.mockResolvedValue({ id: 1 });
+    jest.spyOn(getFakeCustomerRepository(), 'findById').mockResolvedValue({ id: 1 });
 
-    fakeProductRepositories.findAllByIds.mockResolvedValue([
+    jest.spyOn(getFakeProductRepository(), 'findAllByIds').mockResolvedValue([
       { id: 'prod1', name: 'Produto 1', price: 10, quantity: 1 },
     ]);
 
@@ -109,4 +97,4 @@ describe('CreateOrderService', () => {
       })
     ).rejects.toBeInstanceOf(AppError);
   });
-});
+6
