@@ -31,7 +31,7 @@ export default class UpdateProfileService {
       throw new AppError('O antigo password precisa ser informado.')
     }
 
-    if (password && !old_password) {
+    if (password && old_password) {
       const checkOldPassword = await compare(old_password, user.password)
 
       if (!checkOldPassword) {
