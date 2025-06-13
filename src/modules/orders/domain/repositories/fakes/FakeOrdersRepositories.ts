@@ -42,4 +42,8 @@ export default class FakeOrdersRepositories implements IOrderRepositories {
     const order = this.orders.find(order => order.id === id);
     return order || null;
   }
+
+  public async findAll({ skip, take }: { skip: number; take: number }): Promise<Order[]> {
+    return this.orders.slice(skip, skip + take);
+  }
 }

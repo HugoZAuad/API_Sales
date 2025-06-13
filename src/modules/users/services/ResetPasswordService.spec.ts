@@ -30,7 +30,7 @@ describe('ResetPasswordService', () => {
     (hash as jest.Mock).mockResolvedValue('hashed-password');
     const saveSpy = jest.spyOn(fakeUsersRepositories, 'save');
 
-    await resetPasswordService.execute({ token, password: 'newpassword' });
+    await resetPasswordService.execute({ token, password: 'NewPassword123' });
 
     expect(user.password).toBe('hashed-password');
     expect(saveSpy).toHaveBeenCalledWith(user);
@@ -74,6 +74,38 @@ describe('ResetPasswordService', () => {
 
     await expect(
       resetPasswordService.execute({ token: 'valid-token', password: 'newpassword' })
+    ).rejects.toBeInstanceOf(AppError);
+  });
+
+  it('Deve lançar erro se a senha não atender aos critérios de complexidade', async () => {
+    const token = 'valid-token';
+    const userToken = {
+      user_id: 1,
+      token,
+      created_at: new Date(),
+    };
+
+    (userTokensRepositories.findByToken as jest.Mock).mockResolvedValue(userToken);
+    jest.spyOn(fakeUsersRepositories, 'findById').mockResolvedValue({ id: 1, password: 'old-password', save: jest.fn() } as unknown as ReturnType<typeof fakeUsersRepositories.findById>);
+
+    await expect(
+      resetPasswordService.execute({ token, password: '123' }) // senha muito simples
+    ).rejects.toBeInstanceOf(AppError);
+  });
+
+  it('Deve lançar erro se o token for usado múltiplas vezes', async () => {
+    const token = 'valid-token';
+    const userToken = {
+      user_id: 1,
+      token,
+      created_at: new Date(),
+      used: true,
+    };
+
+    (userTokensRepositories.findByToken as jest.Mock).mockResolvedValue(userToken);
+
+    await expect(
+      resetPasswordService.execute({ token, password: 'NewPassword123!' })
     ).rejects.toBeInstanceOf(AppError);
   });
 });

@@ -33,4 +33,12 @@ export default class orderRepositories implements IOrderRepositories {
     return order
   }
 
+  async findAll({ skip, take }: { skip: number; take: number }): Promise<IOrder[]> {
+    const orders = await this.ormRepository.find({
+      skip,
+      take,
+      relations: ['customer', 'order_products'],
+    })
+    return orders
+  }
 }

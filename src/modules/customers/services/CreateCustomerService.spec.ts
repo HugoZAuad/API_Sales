@@ -30,4 +30,25 @@ describe('CreateCustomerService', () => {
       createCustomer.execute(customerData)
     ).rejects.toBeInstanceOf(AppError);
   });
+
+  it('Deve lançar erro se dados obrigatórios estiverem ausentes', async () => {
+    const customerData = makeFakeCustomer({ email: '' }); // email vazio
+
+    await expect(createCustomer.execute(customerData)).rejects.toBeInstanceOf(AppError);
+  });
+
+  it('Deve lançar erro se email for inválido', async () => {
+    const customerData = makeFakeCustomer({ email: 'email-invalido' });
+
+    await expect(createCustomer.execute(customerData)).rejects.toBeInstanceOf(AppError);
+  });
+
+  it('Deve criar cliente com dados contendo caracteres especiais', async () => {
+    const customerData = makeFakeCustomer({ email: 'user+test@example.com' });
+
+    const customer: Customer = await createCustomer.execute(customerData);
+
+    expect(customer).toHaveProperty('id');
+    expect(customer.email).toBe(customerData.email);
+  });
 });

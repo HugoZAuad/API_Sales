@@ -31,4 +31,27 @@ describe('CreateProductService', () => {
       createProduct.execute(productData)
     ).rejects.toBeInstanceOf(AppError);
   });
+
+  it('Deve lançar erro se o preço for negativo', async () => {
+    const productData = makeFakeProduct({ price: -10 });
+
+    await expect(createProduct.execute(productData)).rejects.toBeInstanceOf(AppError);
+  });
+
+  it('Deve lançar erro se a quantidade for zero ou negativa', async () => {
+    const productDataZero = makeFakeProduct({ quantity: 0 });
+    const productDataNegative = makeFakeProduct({ quantity: -5 });
+
+    await expect(createProduct.execute(productDataZero)).rejects.toBeInstanceOf(AppError);
+    await expect(createProduct.execute(productDataNegative)).rejects.toBeInstanceOf(AppError);
+  });
+
+  it('Deve criar produto com nome contendo caracteres especiais', async () => {
+    const productData = makeFakeProduct({ name: 'Produto #1 @ Teste!' });
+
+    const product = await createProduct.execute(productData);
+
+    expect(product).toHaveProperty('id');
+    expect(product.name).toBe(productData.name);
+  });
 });

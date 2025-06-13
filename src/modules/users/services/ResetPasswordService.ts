@@ -30,6 +30,11 @@ export default class ResetPasswordService {
       throw new AppError("Token expirado.", 401);
     }
 
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
+    if (!passwordRegex.test(password)) {
+      throw new AppError("Senha não atende aos critérios de complexidade.", 400);
+    }
+
     user.password = await hash(password, 10);
 
     await this.usersRepositories.save(user);

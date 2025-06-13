@@ -34,4 +34,23 @@ describe('SendForgotPasswordEmailService', () => {
       sendForgotPasswordEmailService.execute({ email: 'naoexiste@example.com' })
     ).rejects.toBeInstanceOf(AppError);
   });
+
+  it('Deve lançar erro se falhar a geração do token', async () => {
+    const userData = makeFakeUser({ name: 'Usuário Teste', email: 'usuario.teste@example.com', password: '123456' });
+    const user = await fakeUsersRepositories.create(userData);
+
+    (userTokensRepositories.generate as jest.Mock).mockRejectedValue(new Error('Token generation error'));
+
+    await expect(sendForgotPasswordEmailService.execute({ email: user.email })).rejects.toThrow('Token generation error');
+  });
+
+  it('Deve lançar erro se falhar o envio do email', async () => {
+    const userData = makeFakeUser({ name: 'Usuário Teste', email: 'usuario.teste@example.com', password: '123456' });
+    const user = await fakeUsersRepositories.create(userData);
+
+    (userTokensRepositories.generate as jest.Mock).mockResolvedValue({ token: 'valid-token' });
+    (sendEmail as jest.Mock).mockImplementation(() => Promise.reject(new Error('Email sending error')));
+
+    await expect(sendForgotPasswordEmailService.execute({ email: user.email })).rejects.toBeInstanceOf(Error);
+  });
 });

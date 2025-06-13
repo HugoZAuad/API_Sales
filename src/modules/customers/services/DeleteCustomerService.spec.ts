@@ -22,4 +22,19 @@ describe('DeleteCustomerService', () => {
   it('Should not be able to delete a non-existing customer', async () => {
     await expect(deleteCustomer.execute({ id: 9999 })).rejects.toBeInstanceOf(AppError);
   });
+
+  it('Deve lançar erro se o id for inválido', async () => {
+    await expect(deleteCustomer.execute({ id: -1 })).rejects.toBeInstanceOf(AppError);
+  });
+
+  it('Deve lançar erro se ocorrer falha no repositório', async () => {
+    const repo = getFakeCustomerRepository();
+    jest.spyOn(repo, 'remove').mockRejectedValue(new Error('Repository error'));
+    deleteCustomer = new DeleteCustomerService(repo);
+
+    const customerData = makeFakeCustomer();
+    const customer = await repo.create(customerData);
+
+    await expect(deleteCustomer.execute({ id: customer.id })).rejects.toThrow('Repository error');
+  });
 });

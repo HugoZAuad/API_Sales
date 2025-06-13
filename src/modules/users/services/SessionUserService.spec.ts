@@ -54,4 +54,46 @@ describe('SessionUserService', () => {
       sessionUserService.execute({ email: user.email, password: 'senhaerrada' })
     ).rejects.toBeInstanceOf(AppError);
   });
+
+  it('Deve lidar com falha na invalidação do cache Redis sem falhar', async () => {
+    const userData = makeFakeUser({ name: 'Usuário Teste', email: 'usuario.teste@example.com', password: 'hashed-password' });
+    const user = await fakeUsersRepositories.create(userData);
+
+    (compare as jest.Mock).mockResolvedValue(true);
+    (sign as jest.Mock).mockReturnValue('jwt-token');
+    redisCacheMock.invalidate.mockRejectedValue(new Error('Redis error'));
+
+    const response = await sessionUserService.execute({
+      email: user.email,
+      password: '123456',
+    });
+
+    expect(response).toHaveProperty('token', 'jwt-token');
+    expect(response).toHaveProperty('user');
+    expect(response.user.email).toBe(user.email);
+  });
+
+  it('Deve gerar token com o payload correto e expiração', async () => {
+    const userData = makeFakeUser({ name: 'Usuário Teste', email: 'usuario.teste@example.com', password: 'hashed-password' });
+    const user = await fakeUsersRepositories.create(userData);
+
+    (compare as jest.Mock).mockResolvedValue(true);
+    const signMock = sign as jest.Mock;
+    signMock.mockReturnValue('jwt-token');
+    redisCacheMock.invalidate.mockResolvedValue();
+
+    await sessionUserService.execute({
+      email: user.email,
+      password: '123456',
+    });
+
+    expect(signMock).toHaveBeenCalledWith(
+      {},
+      expect.any(String),
+      expect.objectContaining({
+        subject: String(user.id),
+        expiresIn: "1d",
+      })
+    );
+  });
 });

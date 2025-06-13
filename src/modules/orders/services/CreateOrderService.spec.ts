@@ -107,4 +107,29 @@ describe('CreateOrderService', () => {
       })
     ).rejects.toBeInstanceOf(AppError);
   });
+
+  it('Deve lançar erro se dados inválidos forem fornecidos', async () => {
+    jest.spyOn(getFakeCustomerRepository(), 'findById').mockResolvedValue({ id: 1, name: 'Cliente Teste', email: 'cliente@teste.com', created_at: new Date(), updated_at: new Date() });
+    jest.spyOn(getFakeProductRepository(), 'findAllByIds').mockResolvedValue([
+      { id: 'prod1', name: 'Produto 1', price: 10, quantity: 5, order_products: [], created_at: new Date(), updated_at: new Date() },
+    ]);
+
+    await expect(
+      createOrderService.execute({
+        customer_id: '',
+        order_products: [{ product_id: '', price: -10, quantity: -1 }],
+      })
+    ).rejects.toBeInstanceOf(AppError);
+  });
+
+  it('Deve lançar erro se o array de produtos estiver vazio', async () => {
+    jest.spyOn(getFakeCustomerRepository(), 'findById').mockResolvedValue({ id: 1, name: 'Cliente Teste', email: 'cliente@teste.com', created_at: new Date(), updated_at: new Date() });
+
+    await expect(
+      createOrderService.execute({
+        customer_id: '1',
+        order_products: [],
+      })
+    ).rejects.toBeInstanceOf(AppError);
+  });
 });

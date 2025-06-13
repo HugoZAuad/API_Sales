@@ -5,4 +5,5 @@ export interface IOrderRepositories {
   create(data: ISaveOrder): Promise<IOrder>
   save(customer: IOrder): Promise<IOrder>
   findById(id: number): Promise<IOrder | null>
+  findAll(params: { skip: number; take: number }): Promise<IOrder[]>
 }
