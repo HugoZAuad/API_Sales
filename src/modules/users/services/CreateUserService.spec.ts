@@ -1,7 +1,7 @@
 import AppError from "@shared/errors/AppError";
 import { makeFakeUser, makeFakeUserRepository } from "@modules/users/domain/factory/UserFactory";
 import CreateUserService from "./CreateUserService";
-
+import bcrypt from 'bcrypt';
 import { IUsersRepositories } from "@modules/users/domain/repositories/IUsersRepositories";
 
 describe('CreateUserService', () => {
@@ -30,5 +30,20 @@ describe('CreateUserService', () => {
     await expect(
       createUser.execute(userData)
     ).rejects.toBeInstanceOf(AppError);
+  });
+
+  it('Deve criptografar a senha do usuário com bcrypt', async () => {
+    const hashSpy = jest.spyOn(bcrypt, 'hash').mockImplementation(() => Promise.resolve('hashed-password'));
+
+    const user = await createUser.execute({
+      name: 'John Doe',
+      email: 'johndoe@example.com',
+      password: '123456',
+    });
+
+    expect(hashSpy).toHaveBeenCalledWith('123456', 10);
+    expect(user.password).toBe('hashed-password');
+
+    hashSpy.mockRestore();
   });
 });
