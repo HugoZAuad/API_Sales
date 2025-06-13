@@ -11,7 +11,9 @@ import { AppDataSource } from "@shared/infra/typeorm/data-source"
 import rateLimiter from "@shared/middlewares/RateLimiter"
 
 const startServer = async () => {
-  await AppDataSource.initialize()
+  if (!AppDataSource.isInitialized) {
+    await AppDataSource.initialize()
+  }
   const app = express()
 
   app.use(cors())

@@ -14,6 +14,10 @@ describe('SessionUserService', () => {
   let sessionUserService: SessionUserService;
   let redisCacheMock: jest.Mocked<RedisCache>;
 
+  beforeAll(() => {
+    process.env.APP_SECRET = 'test-secret';
+  });
+
   beforeEach(() => {
     fakeUsersRepositories = makeFakeUserRepository();
     sessionUserService = new SessionUserService(fakeUsersRepositories);

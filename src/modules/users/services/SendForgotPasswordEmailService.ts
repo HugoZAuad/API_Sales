@@ -18,7 +18,7 @@ export default class SendForgotPasswordEmailService {
 
     const token = await userTokensRepositories.generate(user.id)
 
-    sendEmail({
+    await sendEmail({
       to: email,
       subject: 'Meu vendedor - Recuperação de senha',
       body: `

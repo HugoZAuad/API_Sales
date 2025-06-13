@@ -2,18 +2,41 @@ import { AppDataSource } from '@shared/infra/typeorm/data-source'
 import { App } from 'supertest/types'
 import appPromise from '@shared/infra/http/server'
 import request from 'supertest'
+import { Server } from 'http'
 
 describe('Create User', () => {
   let app: App
+  let server: Server
 
   beforeAll(async () => {
     if (!AppDataSource.isInitialized) {
-      await AppDataSource.initialize()
+      try {
+        await AppDataSource.initialize()
+      } catch (error) {
+        if (!AppDataSource.isInitialized) {
+          throw error
+        }
+      }
     }
-    app = (await appPromise) as App
+    const appInstance = await appPromise()
+    app = appInstance as App
+    if (typeof appInstance.listen === 'function') {
+      server = appInstance.listen()
+    } else {
+      throw new Error('appInstance does not have a listen method')
+    }
   })
 
   afterAll(async () => {
+    if (server) {
+      await new Promise<void>((resolve, reject) => {
+        server.close((err?: Error) => {
+          if (err) reject(err)
+          else resolve()
+        })
+      })
+    }
+
     const entities = AppDataSource.entityMetadatas
 
     for (const entity of entities) {

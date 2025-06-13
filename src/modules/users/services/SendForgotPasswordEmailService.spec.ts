@@ -1,8 +1,8 @@
-import AppError from "@shared/errors/AppError";
 import { makeFakeUser, makeFakeUserRepository } from "@modules/users/domain/factory/UserFactory";
 import SendForgotPasswordEmailService from "./SendForgotPasswordEmailService";
 import { userTokensRepositories } from "../infra/database/repositories/UserTokensRepositories";
 import { sendEmail } from "@config/Email";
+import AppError from "@shared/errors/AppError"
 
 jest.mock("../infra/database/repositories/UserTokensRepositories");
 jest.mock("@config/Email");
@@ -14,6 +14,11 @@ describe('SendForgotPasswordEmailService', () => {
   beforeEach(() => {
     fakeUsersRepositories = makeFakeUserRepository();
     sendForgotPasswordEmailService = new SendForgotPasswordEmailService(fakeUsersRepositories);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   it('Deve enviar email de recuperação de senha com sucesso', async () => {
@@ -51,6 +56,14 @@ describe('SendForgotPasswordEmailService', () => {
     (userTokensRepositories.generate as jest.Mock).mockResolvedValue({ token: 'valid-token' });
     (sendEmail as jest.Mock).mockImplementation(() => Promise.reject(new Error('Email sending error')));
 
-    await expect(sendForgotPasswordEmailService.execute({ email: user.email })).rejects.toBeInstanceOf(Error);
+    try {
+      await sendForgotPasswordEmailService.execute({ email: user.email });
+      throw new Error('Expected error was not thrown');
+    } catch (error: unknown) {
+      expect(error).toBeInstanceOf(Error);
+      if (error instanceof Error) {
+        expect(error.message).toBe('Email sending error');
+      }
+    }
   });
 });
