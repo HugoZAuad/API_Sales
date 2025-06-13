@@ -4,7 +4,7 @@ import appPromise from '@shared/infra/http/server'
 import request from 'supertest'
 import { Server } from 'http'
 
-describe('Criar Usuario', () => {
+describe('Criar produto', () => {
   let app: App
   let server: Server
 
@@ -22,7 +22,7 @@ describe('Criar Usuario', () => {
     app = appInstance as App
     if (typeof appInstance.listen === 'function') {
       server = appInstance.listen()
-    } 
+    }
   })
 
   afterAll(async () => {
@@ -46,35 +46,28 @@ describe('Criar Usuario', () => {
     }
   })
 
-  it('Deve ser capaz de criar um novo usuario', async () => {
-    const response = await request(app).post('/users').send({
-      name: 'John Doe',
-      email: 'johndoe@example.com',
-      password: '123456'
-    })
+  it("deve criar um novo produto", async () => {
+    const response = await request(app)
+      .post("/products")
+      .send({
+        name: "Produto Teste",
+        price: 99.99,
+        quantity: 10,
+      })
 
     expect(response.status).toBe(200)
-    expect(response.body).toHaveProperty('id')
-    expect(response.body.email).toBe('johndoe@example.com')
+    expect(response.body).toHaveProperty("id")
+    expect(response.body.name).toBe("Produto Teste")
   })
 
-  it('Não deve ser capaz de criar um novo usuario com email ja existente', async () => {
-    await request(app).post('/users').send({
-      name: 'John Doe',
-      email: 'johndoeduplicate@example.com',
-      password: '123456'
-    })
+  it("deve retornar erro ao criar produto sem nome", async () => {
+    const response = await request(app)
+      .post("/products")
+      .send({
+        price: 99.99,
+        quantity: 10,
+      })
 
-    const response = await request(app).post('/users').send({
-      name: 'Jane Doe',
-      email: 'johndoeduplicate@example.com',
-      password: '324562321'
-    })
-
-    expect(response.status).toBe(409)
-    expect(response.body).toHaveProperty(
-      'message',
-      'Endereço de e-mail já cadastrado'
-    )
+    expect(response.status).toBe(400)
   })
 })

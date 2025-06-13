@@ -4,7 +4,7 @@ import appPromise from '@shared/infra/http/server'
 import request from 'supertest'
 import { Server } from 'http'
 
-describe('Criar Usuario', () => {
+describe('Criar cliente', () => {
   let app: App
   let server: Server
 
@@ -22,7 +22,7 @@ describe('Criar Usuario', () => {
     app = appInstance as App
     if (typeof appInstance.listen === 'function') {
       server = appInstance.listen()
-    } 
+    }
   })
 
   afterAll(async () => {
@@ -46,35 +46,29 @@ describe('Criar Usuario', () => {
     }
   })
 
-  it('Deve ser capaz de criar um novo usuario', async () => {
-    const response = await request(app).post('/users').send({
-      name: 'John Doe',
-      email: 'johndoe@example.com',
-      password: '123456'
+  describe("Customer Integration", () => {
+    it("deve criar um novo cliente", async () => {
+      const response = await request(app)
+        .post("/customers")
+        .send({
+          name: "Cliente Teste",
+          email: "cliente@teste.com",
+        })
+
+      expect(response.status).toBe(201)
+      expect(response.body).toHaveProperty("id")
+      expect(response.body.name).toBe("Cliente Teste")
     })
 
-    expect(response.status).toBe(200)
-    expect(response.body).toHaveProperty('id')
-    expect(response.body.email).toBe('johndoe@example.com')
-  })
+    it("deve retornar erro ao criar cliente com email inválido", async () => {
+      const response = await request(app)
+        .post("/customers")
+        .send({
+          name: "Cliente Teste",
+          email: "emailinvalido",
+        })
 
-  it('Não deve ser capaz de criar um novo usuario com email ja existente', async () => {
-    await request(app).post('/users').send({
-      name: 'John Doe',
-      email: 'johndoeduplicate@example.com',
-      password: '123456'
+      expect(response.status).toBe(401)
     })
-
-    const response = await request(app).post('/users').send({
-      name: 'Jane Doe',
-      email: 'johndoeduplicate@example.com',
-      password: '324562321'
-    })
-
-    expect(response.status).toBe(409)
-    expect(response.body).toHaveProperty(
-      'message',
-      'Endereço de e-mail já cadastrado'
-    )
   })
 })
