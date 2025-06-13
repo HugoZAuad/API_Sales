@@ -1,26 +1,23 @@
 import AppError from "@shared/errors/AppError";
 import ResetPasswordService from "./ResetPasswordService";
-import FakeUsersRepositories from "@modules/users/infra/database/repositories/Fakes/FakeUsersRepositories";
+import { makeFakeUser, makeFakeUserRepository } from "@modules/users/domain/factory/UserFactory";
 import { userTokensRepositories } from "../infra/database/repositories/UserTokensRepositories";
 import { hash } from "bcrypt";
 jest.mock("../infra/database/repositories/UserTokensRepositories");
 jest.mock("bcrypt");
 
 describe('ResetPasswordService', () => {
-  let fakeUsersRepositories: FakeUsersRepositories;
+  let fakeUsersRepositories: ReturnType<typeof makeFakeUserRepository>;
   let resetPasswordService: ResetPasswordService;
 
   beforeEach(() => {
-    fakeUsersRepositories = new FakeUsersRepositories();
+    fakeUsersRepositories = makeFakeUserRepository();
     resetPasswordService = new ResetPasswordService(fakeUsersRepositories);
   });
 
   it('Deve resetar a senha com sucesso', async () => {
-    const user = await fakeUsersRepositories.create({
-      name: 'Usuário Teste',
-      email: 'usuario.teste@example.com',
-      password: '123456',
-    });
+    const userData = makeFakeUser({ name: 'Usuário Teste', email: 'usuario.teste@example.com', password: '123456' });
+    const user = await fakeUsersRepositories.create(userData);
 
     const token = 'valid-token';
     const userToken = {
@@ -63,11 +60,8 @@ describe('ResetPasswordService', () => {
   });
 
   it('Deve lançar erro se token estiver expirado', async () => {
-    const user = await fakeUsersRepositories.create({
-      name: 'Usuário Teste',
-      email: 'usuario.teste@example.com',
-      password: '123456',
-    });
+    const userData = makeFakeUser({ name: 'Usuário Teste', email: 'usuario.teste@example.com', password: '123456' });
+    const user = await fakeUsersRepositories.create(userData);
 
     const pastDate = new Date(Date.now() - 3 * 60 * 60 * 1000); 
     const userToken = {

@@ -1,5 +1,5 @@
 import FakeOrdersRepositories from "@modules/orders/domain/repositories/fakes/FakeOrdersRepositories";
-import { ICreateOrderRepositories } from "@modules/orders/domain/repositories/ICreateOrderRepositories";
+import { IOrderRepositories } from "@modules/orders/domain/repositories/ICreateOrderRepositories";
 
 interface OrderProductData {
   product_id: string;
@@ -36,6 +36,6 @@ export function makeFakeOrder(overrides?: Partial<OrderData>): OrderData {
   };
 }
 
-export function makeFakeOrderRepository(): ICreateOrderRepositories {
+export function makeFakeOrderRepository(): IOrderRepositories {
   return new FakeOrdersRepositories();
 }

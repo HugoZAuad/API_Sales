@@ -1,5 +1,5 @@
 import AppError from "@shared/errors/AppError";
-import FakeUsersRepositories from "@modules/users/infra/database/repositories/Fakes/FakeUsersRepositories";
+import { makeFakeUser, makeFakeUserRepository } from "@modules/users/domain/factory/UserFactory";
 import SessionUserService from "./SessionUserService";
 import { compare } from "bcrypt";
 import { sign } from "jsonwebtoken";
@@ -10,22 +10,19 @@ jest.mock("jsonwebtoken");
 jest.mock("@shared/cache/RedisCache");
 
 describe('SessionUserService', () => {
-  let fakeUsersRepositories: FakeUsersRepositories;
+  let fakeUsersRepositories: ReturnType<typeof makeFakeUserRepository>;
   let sessionUserService: SessionUserService;
   let redisCacheMock: jest.Mocked<RedisCache>;
 
   beforeEach(() => {
-    fakeUsersRepositories = new FakeUsersRepositories();
+    fakeUsersRepositories = makeFakeUserRepository();
     sessionUserService = new SessionUserService(fakeUsersRepositories);
     redisCacheMock = new RedisCache() as jest.Mocked<RedisCache>;
   });
 
   it('Deve autenticar usuário com sucesso e retornar token', async () => {
-    const user = await fakeUsersRepositories.create({
-      name: 'Usuário Teste',
-      email: 'usuario.teste@example.com',
-      password: 'hashed-password',
-    });
+    const userData = makeFakeUser({ name: 'Usuário Teste', email: 'usuario.teste@example.com', password: 'hashed-password' });
+    const user = await fakeUsersRepositories.create(userData);
 
     (compare as jest.Mock).mockResolvedValue(true);
     (sign as jest.Mock).mockReturnValue('jwt-token');
@@ -48,11 +45,8 @@ describe('SessionUserService', () => {
   });
 
   it('Deve lançar erro se senha estiver incorreta', async () => {
-    const user = await fakeUsersRepositories.create({
-      name: 'Usuário Teste',
-      email: 'usuario.teste@example.com',
-      password: 'hashed-password',
-    });
+    const userData = makeFakeUser({ name: 'Usuário Teste', email: 'usuario.teste@example.com', password: 'hashed-password' });
+    const user = await fakeUsersRepositories.create(userData);
 
     (compare as jest.Mock).mockResolvedValue(false);
 

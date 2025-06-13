@@ -1,11 +1,11 @@
 import AppError from "@shared/errors/AppError";
 import { CreateOrderService } from "./CreateOrderService";
 
-import { setupOrderServiceTest } from "./OrderServiceTestUtils";
+import { setupOrderServiceTest } from "../domain/factory/OrderServiceTestUtils";
 
 describe('CreateOrderService', () => {
   let createOrderService: CreateOrderService;
-  const { getFakeOrderRepository, getFakeProductRepository, getFakeCustomerRepository, makeFakeOrder } = setupOrderServiceTest();
+  const { getFakeOrderRepository, getFakeProductRepository, getFakeCustomerRepository } = setupOrderServiceTest();
 
   beforeEach(() => {
     createOrderService = new CreateOrderService(
@@ -20,14 +20,24 @@ describe('CreateOrderService', () => {
       id: 1,
       name: 'Cliente Teste',
       email: 'cliente@teste.com',
+      created_at: new Date(),
+      updated_at: new Date(),
     });
 
     jest.spyOn(getFakeProductRepository(), 'findAllByIds').mockResolvedValue([
-      { id: 'prod1', name: 'Produto 1', price: 10, quantity: 5 },
-      { id: 'prod2', name: 'Produto 2', price: 20, quantity: 10 },
+      { id: 'prod1', name: 'Produto 1', price: 10, quantity: 5, order_products: [], created_at: new Date(), updated_at: new Date() },
+      { id: 'prod2', name: 'Produto 2', price: 20, quantity: 10, order_products: [], created_at: new Date(), updated_at: new Date() },
     ]);
 
-    jest.spyOn(getFakeProductRepository(), 'save').mockResolvedValue(undefined);
+    jest.spyOn(getFakeProductRepository(), 'save').mockResolvedValue({
+      id: 'prod1',
+      name: 'Produto 1',
+      price: 10,
+      quantity: 5,
+      order_products: [],
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
 
     const orderData = {
       customer_id: '1',
@@ -56,7 +66,7 @@ describe('CreateOrderService', () => {
   });
 
   it('Deve lançar erro se produtos não forem encontrados', async () => {
-    jest.spyOn(getFakeCustomerRepository(), 'findById').mockResolvedValue({ id: 1 });
+    jest.spyOn(getFakeCustomerRepository(), 'findById').mockResolvedValue({ id: 1, name: 'Cliente Teste', email: 'cliente@teste.com', created_at: new Date(), updated_at: new Date() });
 
     jest.spyOn(getFakeProductRepository(), 'findAllByIds').mockResolvedValue([]);
 
@@ -69,10 +79,10 @@ describe('CreateOrderService', () => {
   });
 
   it('Deve lançar erro se algum produto não existir', async () => {
-    jest.spyOn(getFakeCustomerRepository(), 'findById').mockResolvedValue({ id: 1 });
+    jest.spyOn(getFakeCustomerRepository(), 'findById').mockResolvedValue({ id: 1, name: 'Cliente Teste', email: 'cliente@teste.com', created_at: new Date(), updated_at: new Date() });
 
     jest.spyOn(getFakeProductRepository(), 'findAllByIds').mockResolvedValue([
-      { id: 'prod2', name: 'Produto 2', price: 20, quantity: 10 },
+      { id: 'prod2', name: 'Produto 2', price: 20, quantity: 10, order_products: [], created_at: new Date(), updated_at: new Date() },
     ]);
 
     await expect(
@@ -84,10 +94,10 @@ describe('CreateOrderService', () => {
   });
 
   it('Deve lançar erro se a quantidade solicitada não estiver disponível', async () => {
-    jest.spyOn(getFakeCustomerRepository(), 'findById').mockResolvedValue({ id: 1 });
+    jest.spyOn(getFakeCustomerRepository(), 'findById').mockResolvedValue({ id: 1, name: 'Cliente Teste', email: 'cliente@teste.com', created_at: new Date(), updated_at: new Date() });
 
     jest.spyOn(getFakeProductRepository(), 'findAllByIds').mockResolvedValue([
-      { id: 'prod1', name: 'Produto 1', price: 10, quantity: 1 },
+      { id: 'prod1', name: 'Produto 1', price: 10, quantity: 1, order_products: [], created_at: new Date(), updated_at: new Date() },
     ]);
 
     await expect(
@@ -97,4 +107,4 @@ describe('CreateOrderService', () => {
       })
     ).rejects.toBeInstanceOf(AppError);
   });
-6
+});

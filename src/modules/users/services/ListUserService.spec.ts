@@ -1,16 +1,16 @@
-import FakeUsersRepositories from "@modules/users/infra/database/repositories/Fakes/FakeUsersRepositories";
+import { makeFakeUser, makeFakeUserRepository } from "@modules/users/domain/factory/UserFactory";
 import ListUserService from "./LiserUserService";
 import RedisCache from "@shared/cache/RedisCache";
 
 jest.mock("@shared/cache/RedisCache");
 
 describe('ListUserService', () => {
-  let fakeUsersRepositories: FakeUsersRepositories;
+  let fakeUsersRepositories: ReturnType<typeof makeFakeUserRepository>;
   let listUserService: ListUserService;
   let redisCacheMock: jest.Mocked<RedisCache>;
 
   beforeEach(() => {
-    fakeUsersRepositories = new FakeUsersRepositories();
+    fakeUsersRepositories = makeFakeUserRepository();
     listUserService = new ListUserService(fakeUsersRepositories);
     redisCacheMock = new RedisCache() as jest.Mocked<RedisCache>;
   });
@@ -19,8 +19,8 @@ describe('ListUserService', () => {
     redisCacheMock.recover.mockResolvedValue(null);
     redisCacheMock.save.mockResolvedValue();
 
-    await fakeUsersRepositories.create({ name: 'Usuário 1', email: 'user1@example.com', password: '123456' });
-    await fakeUsersRepositories.create({ name: 'Usuário 2', email: 'user2@example.com', password: '123456' });
+    await fakeUsersRepositories.create(makeFakeUser({ name: 'Usuário 1', email: 'user1@example.com', password: '123456' }));
+    await fakeUsersRepositories.create(makeFakeUser({ name: 'Usuário 2', email: 'user2@example.com', password: '123456' }));
 
     const result = await listUserService.execute(1, 10);
 

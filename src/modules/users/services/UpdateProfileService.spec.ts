@@ -1,25 +1,22 @@
 import AppError from "@shared/errors/AppError";
-import FakeUsersRepositories from "@modules/users/infra/database/repositories/Fakes/FakeUsersRepositories";
+import { makeFakeUser, makeFakeUserRepository } from "@modules/users/domain/factory/UserFactory";
 import UpdateProfileService from "./UpdateProfileService";
 import { compare, hash } from "bcrypt";
 
 jest.mock("bcrypt");
 
 describe('UpdateProfileService', () => {
-  let fakeUsersRepositories: FakeUsersRepositories;
+  let fakeUsersRepositories: ReturnType<typeof makeFakeUserRepository>;
   let updateProfileService: UpdateProfileService;
 
   beforeEach(() => {
-    fakeUsersRepositories = new FakeUsersRepositories();
+    fakeUsersRepositories = makeFakeUserRepository();
     updateProfileService = new UpdateProfileService(fakeUsersRepositories);
   });
 
   it('Deve atualizar o perfil do usuário com sucesso', async () => {
-    const user = await fakeUsersRepositories.create({
-      name: 'Usuário Teste',
-      email: 'usuario.teste@example.com',
-      password: 'hashed-password',
-    });
+    const userData = makeFakeUser({ name: 'Usuário Teste', email: 'usuario.teste@example.com', password: 'hashed-password' });
+    const user = await fakeUsersRepositories.create(userData);
 
     jest.spyOn(fakeUsersRepositories, 'findByEmail').mockResolvedValue(null);
     (compare as jest.Mock).mockResolvedValue(true);
@@ -54,11 +51,8 @@ describe('UpdateProfileService', () => {
   });
 
   it('Deve lançar erro se email já estiver em uso', async () => {
-    const user = await fakeUsersRepositories.create({
-      name: 'Usuário Teste',
-      email: 'usuario.teste@example.com',
-      password: 'hashed-password',
-    });
+    const userData = makeFakeUser({ name: 'Usuário Teste', email: 'usuario.teste@example.com', password: 'hashed-password' });
+    const user = await fakeUsersRepositories.create(userData);
 
     jest.spyOn(fakeUsersRepositories, 'findByEmail').mockResolvedValue(user);
 
@@ -74,11 +68,8 @@ describe('UpdateProfileService', () => {
   });
 
   it('Deve lançar erro se tentar alterar senha sem informar a senha antiga', async () => {
-    const user = await fakeUsersRepositories.create({
-      name: 'Usuário Teste',
-      email: 'usuario.teste@example.com',
-      password: 'hashed-password',
-    });
+    const userData = makeFakeUser({ name: 'Usuário Teste', email: 'usuario.teste@example.com', password: 'hashed-password' });
+    const user = await fakeUsersRepositories.create(userData);
 
     await expect(
       updateProfileService.execute({
@@ -92,11 +83,8 @@ describe('UpdateProfileService', () => {
   });
 
   it('Deve lançar erro se a senha antiga estiver incorreta', async () => {
-    const user = await fakeUsersRepositories.create({
-      name: 'Usuário Teste',
-      email: 'usuario.teste@example.com',
-      password: 'hashed-password',
-    });
+    const userData = makeFakeUser({ name: 'Usuário Teste', email: 'usuario.teste@example.com', password: 'hashed-password' });
+    const user = await fakeUsersRepositories.create(userData);
 
     (compare as jest.Mock).mockImplementation(async () => false);
 

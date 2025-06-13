@@ -1,30 +1,19 @@
 import AppError from "@shared/errors/AppError";
-import FakeOrdersRepositories from "@modules/orders/domain/repositories/fakes/FakeOrdersRepositories";
 import { ShowOrderService } from "./ShowOrderService";
+import { setupOrderServiceTest } from "../domain/factory/OrderServiceTestUtils";
 
 describe('ShowOrderService', () => {
-  let fakeOrdersRepositories: FakeOrdersRepositories;
   let showOrderService: ShowOrderService;
+  const { getFakeOrderRepository, makeFakeOrder } = setupOrderServiceTest();
 
   beforeEach(() => {
-    fakeOrdersRepositories = new FakeOrdersRepositories();
-    showOrderService = new ShowOrderService(fakeOrdersRepositories);
+    showOrderService = new ShowOrderService(getFakeOrderRepository());
   });
 
   it('Deve retornar um pedido existente pelo id', async () => {
-    const order = await fakeOrdersRepositories.create({
-      customer_id: '1',
-      order_products: [
-        { product_id: 'prod1', price: 10, quantity: 2 },
-      ],
-      customer: {
-        id: 1,
-        name: 'Cliente Teste',
-        email: 'cliente@teste.com',
-        created_at: new Date(),
-        updated_at: new Date(),
-      }
-    });
+    const fakeOrder = makeFakeOrder();
+
+    const order = await getFakeOrderRepository().create(fakeOrder);
 
     const foundOrder = await showOrderService.execute(order.id.toString());
 

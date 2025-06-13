@@ -1,22 +1,19 @@
 import AppError from "@shared/errors/AppError";
-import FakeProductsRepositories from "@modules/products/infra/database/repositories/Fakes/FakeProductsRepositories";
+import { makeFakeProduct, makeFakeProductRepository } from "@modules/products/domain/factory/ProductFactory";
 import ShowProductService from "./ShowProductService";
 
 describe('ShowProductService', () => {
-  let fakeProductsRepositories: FakeProductsRepositories;
+  let fakeProductsRepositories: ReturnType<typeof makeFakeProductRepository>;
   let showProductService: ShowProductService;
 
   beforeEach(() => {
-    fakeProductsRepositories = new FakeProductsRepositories();
+    fakeProductsRepositories = makeFakeProductRepository();
     showProductService = new ShowProductService(fakeProductsRepositories);
   });
 
   it('Deve retornar um produto existente pelo id', async () => {
-    const product = await fakeProductsRepositories.create({
-      name: 'Produto Teste',
-      price: 100,
-      quantity: 10,
-    });
+    const productData = makeFakeProduct({ name: 'Produto Teste', price: 100, quantity: 10 });
+    const product = await fakeProductsRepositories.create(productData);
 
     const foundProduct = await showProductService.execute({ id: product.id });
 

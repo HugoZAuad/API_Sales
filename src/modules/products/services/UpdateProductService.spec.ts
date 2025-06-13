@@ -1,22 +1,19 @@
 import AppError from "@shared/errors/AppError";
-import FakeProductsRepositories from "@modules/products/infra/database/repositories/Fakes/FakeProductsRepositories";
+import { makeFakeProduct, makeFakeProductRepository } from "@modules/products/domain/factory/ProductFactory";
 import UpdateProductService from "./UpdateProductService";
 
 describe('UpdateProductService', () => {
-  let fakeProductsRepositories: FakeProductsRepositories;
+  let fakeProductsRepositories: ReturnType<typeof makeFakeProductRepository>;
   let updateProductService: UpdateProductService;
 
   beforeEach(() => {
-    fakeProductsRepositories = new FakeProductsRepositories();
+    fakeProductsRepositories = makeFakeProductRepository();
     updateProductService = new UpdateProductService(fakeProductsRepositories);
   });
 
   it('Deve atualizar um produto existente com sucesso', async () => {
-    const product = await fakeProductsRepositories.create({
-      name: 'Produto Teste',
-      price: 100,
-      quantity: 10,
-    });
+    const productData = makeFakeProduct({ name: 'Produto Teste', price: 100, quantity: 10 });
+    const product = await fakeProductsRepositories.create(productData);
 
     const updatedProduct = await updateProductService.execute({
       id: product.id,
@@ -42,17 +39,11 @@ describe('UpdateProductService', () => {
   });
 
   it('Deve lançar erro se já existir outro produto com o mesmo nome', async () => {
-    await fakeProductsRepositories.create({
-      name: 'Produto Existente',
-      price: 100,
-      quantity: 10,
-    });
+    const existingProductData = makeFakeProduct({ name: 'Produto Existente', price: 100, quantity: 10 });
+    await fakeProductsRepositories.create(existingProductData);
 
-    const product = await fakeProductsRepositories.create({
-      name: 'Produto Teste',
-      price: 100,
-      quantity: 10,
-    });
+    const productData = makeFakeProduct({ name: 'Produto Teste', price: 100, quantity: 10 });
+    const product = await fakeProductsRepositories.create(productData);
 
     await expect(
       updateProductService.execute({

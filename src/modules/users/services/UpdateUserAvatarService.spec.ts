@@ -3,7 +3,7 @@ jest.mock('app-root-path', () => ({
 }));
 
 import AppError from "@shared/errors/AppError";
-import FakeUsersRepositories from "@modules/users/infra/database/repositories/Fakes/FakeUsersRepositories";
+import { makeFakeUser, makeFakeUserRepository } from "@modules/users/domain/factory/UserFactory";
 import UpdateUserAvatarService from "./UpdateUserAvatarService";
 import fs from "fs";
 import path from "path";
@@ -15,12 +15,12 @@ jest.mock("@config/Upload");
 jest.mock("@shared/cache/RedisCache");
 
 describe('UpdateUserAvatarService', () => {
-  let fakeUsersRepositories: FakeUsersRepositories;
+  let fakeUsersRepositories: ReturnType<typeof makeFakeUserRepository>;
   let updateUserAvatarService: UpdateUserAvatarService;
   let redisCacheMock: jest.Mocked<RedisCache>;
 
   beforeEach(() => {
-    fakeUsersRepositories = new FakeUsersRepositories();
+    fakeUsersRepositories = makeFakeUserRepository();
     updateUserAvatarService = new UpdateUserAvatarService(fakeUsersRepositories);
     redisCacheMock = new RedisCache() as jest.Mocked<RedisCache>;
 
@@ -43,11 +43,8 @@ describe('UpdateUserAvatarService', () => {
   });
 
   it('Deve atualizar o avatar do usuário e remover o avatar antigo', async () => {
-    const user = await fakeUsersRepositories.create({
-      name: 'Usuário Teste',
-      email: 'usuario.teste@example.com',
-      password: '123456',
-    });
+    const userData = makeFakeUser({ name: 'Usuário Teste', email: 'usuario.teste@example.com', password: '123456' });
+    const user = await fakeUsersRepositories.create(userData);
 
     user.avatar = 'old-avatar.jpg';
 

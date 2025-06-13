@@ -1,22 +1,19 @@
 import AppError from "@shared/errors/AppError";
-import FakeProductsRepositories from "@modules/products/infra/database/repositories/Fakes/FakeProductsRepositories";
+import { makeFakeProduct, makeFakeProductRepository } from "@modules/products/domain/factory/ProductFactory";
 import DeleteProductService from "./DeleteProductService";
 
 describe('DeleteProductService', () => {
-  let fakeProductsRepositories: FakeProductsRepositories;
+  let fakeProductsRepositories: ReturnType<typeof makeFakeProductRepository>;
   let deleteProductService: DeleteProductService;
 
   beforeEach(() => {
-    fakeProductsRepositories = new FakeProductsRepositories();
+    fakeProductsRepositories = makeFakeProductRepository();
     deleteProductService = new DeleteProductService(fakeProductsRepositories);
   });
 
   it('Deve remover um produto existente com sucesso', async () => {
-    const product = await fakeProductsRepositories.create({
-      name: 'Produto Teste',
-      price: 100,
-      quantity: 10,
-    });
+    const productData = makeFakeProduct({ name: 'Produto Teste', price: 100, quantity: 10 });
+    const product = await fakeProductsRepositories.create(productData);
 
     await expect(deleteProductService.execute({ id: product.id })).resolves.toBeUndefined();
 

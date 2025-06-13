@@ -1,5 +1,5 @@
 import AppError from "@shared/errors/AppError";
-import FakeUsersRepositories from "@modules/users/infra/database/repositories/Fakes/FakeUsersRepositories";
+import { makeFakeUser, makeFakeUserRepository } from "@modules/users/domain/factory/UserFactory";
 import SendForgotPasswordEmailService from "./SendForgotPasswordEmailService";
 import { userTokensRepositories } from "../infra/database/repositories/UserTokensRepositories";
 import { sendEmail } from "@config/Email";
@@ -8,20 +8,17 @@ jest.mock("../infra/database/repositories/UserTokensRepositories");
 jest.mock("@config/Email");
 
 describe('SendForgotPasswordEmailService', () => {
-  let fakeUsersRepositories: FakeUsersRepositories;
+  let fakeUsersRepositories: ReturnType<typeof makeFakeUserRepository>;
   let sendForgotPasswordEmailService: SendForgotPasswordEmailService;
 
   beforeEach(() => {
-    fakeUsersRepositories = new FakeUsersRepositories();
+    fakeUsersRepositories = makeFakeUserRepository();
     sendForgotPasswordEmailService = new SendForgotPasswordEmailService(fakeUsersRepositories);
   });
 
   it('Deve enviar email de recuperação de senha com sucesso', async () => {
-    const user = await fakeUsersRepositories.create({
-      name: 'Usuário Teste',
-      email: 'usuario.teste@example.com',
-      password: '123456',
-    });
+    const userData = makeFakeUser({ name: 'Usuário Teste', email: 'usuario.teste@example.com', password: '123456' });
+    const user = await fakeUsersRepositories.create(userData);
 
     (userTokensRepositories.generate as jest.Mock).mockResolvedValue({ token: 'valid-token' });
     (sendEmail as jest.Mock).mockImplementation(() => Promise.resolve());
