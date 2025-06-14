@@ -7,6 +7,7 @@ import { Server } from 'http'
 describe('Criar cliente', () => {
   let app: App
   let server: Server
+  let token: string
 
   beforeAll(async () => {
     if (!AppDataSource.isInitialized) {
@@ -23,6 +24,16 @@ describe('Criar cliente', () => {
     if (typeof appInstance.listen === 'function') {
       server = appInstance.listen()
     }
+
+    await request(app)
+      .post("/users")
+      .send({ name: "Teste", email: "teste@teste.com", password: "123456" });
+
+    const loginResponse = await request(app)
+      .post("/sessions")
+      .send({ email: "teste@teste.com", password: "123456" });
+
+    token = loginResponse.body.token;
   })
 
   afterAll(async () => {
@@ -50,12 +61,13 @@ describe('Criar cliente', () => {
     it("deve criar um novo cliente", async () => {
       const response = await request(app)
         .post("/customers")
+        .set('Authorization', `Bearer ${token}`)
         .send({
           name: "Cliente Teste",
           email: "cliente@teste.com",
         })
 
-      expect(response.status).toBe(201)
+      expect(response.status).toBe(200)
       expect(response.body).toHaveProperty("id")
       expect(response.body.name).toBe("Cliente Teste")
     })
@@ -63,12 +75,13 @@ describe('Criar cliente', () => {
     it("deve retornar erro ao criar cliente com email inválido", async () => {
       const response = await request(app)
         .post("/customers")
+        .set('Authorization', `Bearer ${token}`)
         .send({
           name: "Cliente Teste",
           email: "emailinvalido",
         })
 
-      expect(response.status).toBe(401)
+      expect(response.status).toBe(400)
     })
   })
 })
