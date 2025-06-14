@@ -10,9 +10,11 @@ import { injectable, inject } from "tsyringe"
 @injectable()
 export class CreateOrderService {
   constructor(
-    @inject('orderRepositories')
+    @inject('productRepositories')
     private readonly productRepositories: IProductRepositories,
+    @inject('customerRepositories')
     private readonly customerRepositories: ICustomerRepositories,
+    @inject('orderRepositories')
     private readonly orderRepositories: IOrderRepositories
   ) {}
 
@@ -51,10 +53,19 @@ export class CreateOrderService {
       throw new AppError(`A quantidade não está disponivel para o produto`, 409);
     }
 
+    const orderProductsWithPrice = order_products.map(product => {
+      const productData = existsProducts.find(p => p.id === product.product_id);
+      return {
+        product_id: product.product_id,
+        quantity: product.quantity,
+        price: productData ? productData.price : 0,
+      };
+    });
+
     const order = await this.orderRepositories.create({
       customer_id: customerExists.id.toString(),
       customer: customerExists,
-      order_products: order_products,
+      order_products: orderProductsWithPrice,
     });
 
     const updateProductQuantity = order.order_products.map(
