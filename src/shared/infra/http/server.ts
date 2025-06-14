@@ -29,4 +29,14 @@ const startServer = async () => {
   return app
 }
 
-export default startServer
+startServer()
+  .then(app => {
+    app.listen(3333, () => {
+      console.log("🚀 O servidor foi iniciado na porta 3333!")
+    })
+  })
+  .catch(error => {
+    console.error("Falha ao conectar ao servidor: ", error)
+  })
+
+  export default startServer;
